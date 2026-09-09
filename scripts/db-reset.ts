@@ -3,26 +3,26 @@ import { loadScriptEnv, describeTarget } from './_env'
 loadScriptEnv()
 
 /**
- * Drop everything Bloom owns and rebuild from migrations + seed.
+ * Drop everything LivinUp owns and rebuild from migrations + seed.
  *
  *   npm run db:reset
  *
- * Destructive. Refuses to run against a remote database unless BLOOM_ALLOW_
+ * Destructive. Refuses to run against a remote database unless LIVINUP_ALLOW_
  * REMOTE_RESET=yes is set, so a stray invocation cannot wipe a shared
  * environment.
  */
 async function main(): Promise<void> {
   const driver =
-    process.env.BLOOM_DB_DRIVER && process.env.BLOOM_DB_DRIVER !== 'auto'
-      ? process.env.BLOOM_DB_DRIVER
+    process.env.LIVINUP_DB_DRIVER && process.env.LIVINUP_DB_DRIVER !== 'auto'
+      ? process.env.LIVINUP_DB_DRIVER
       : process.env.DATABASE_URL
         ? 'postgres'
         : 'pglite'
 
-  if (driver !== 'pglite' && process.env.BLOOM_ALLOW_REMOTE_RESET !== 'yes') {
+  if (driver !== 'pglite' && process.env.LIVINUP_ALLOW_REMOTE_RESET !== 'yes') {
     console.error(
       `Refusing to reset ${describeTarget()}.\n` +
-        'This would drop every table. If you are certain, re-run with BLOOM_ALLOW_REMOTE_RESET=yes.',
+        'This would drop every table. If you are certain, re-run with LIVINUP_ALLOW_REMOTE_RESET=yes.',
     )
     process.exitCode = 1
     return

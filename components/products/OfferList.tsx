@@ -13,7 +13,7 @@ const AVAILABILITY_LABEL: Record<string, string> = {
  * Merchant comparison.
  *
  * Renders every known offer with its price and availability. Deliberately makes
- * no "best price" claim: Bloom only knows the merchants it has ingested, and
+ * no "best price" claim: LivinUp only knows the merchants it has ingested, and
  * claiming a global lowest price from a partial view would be false.
  */
 export function OfferList({

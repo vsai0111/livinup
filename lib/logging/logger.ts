@@ -12,7 +12,7 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 const LEVEL_ORDER: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 }
 
 function activeLevel(): LogLevel {
-  const raw = process.env.BLOOM_LOG_LEVEL
+  const raw = process.env.LIVINUP_LOG_LEVEL
   if (raw === 'debug' || raw === 'info' || raw === 'warn' || raw === 'error') return raw
   return 'info'
 }

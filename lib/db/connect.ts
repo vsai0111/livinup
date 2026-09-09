@@ -20,8 +20,8 @@ export async function createDbHandle(): Promise<DbHandle> {
   if (driver === 'postgres') {
     if (!env.DATABASE_URL) {
       throw new Error(
-        'BLOOM_DB_DRIVER resolved to "postgres" but DATABASE_URL is not set. ' +
-          'Set DATABASE_URL, or set BLOOM_DB_DRIVER=pglite to use the embedded database.',
+        'LIVINUP_DB_DRIVER resolved to "postgres" but DATABASE_URL is not set. ' +
+          'Set DATABASE_URL, or set LIVINUP_DB_DRIVER=pglite to use the embedded database.',
       )
     }
     logger.info('connecting to postgres')

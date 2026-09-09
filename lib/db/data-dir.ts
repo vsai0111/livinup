@@ -6,11 +6,11 @@ import path from 'node:path'
  * Where the embedded database is allowed to put its files.
  *
  * PGlite needs a writable directory. The configured value (`PGLITE_DATA_DIR`)
- * is project-relative by default — `.bloom/pgdata` — which is correct on a
+ * is project-relative by default — `.livinup/pgdata` — which is correct on a
  * developer machine and impossible in a serverless runtime, where the
  * deployment bundle is mounted read-only and `process.cwd()` is not writable.
  * Resolving a relative path against the bundle root there is what produced
- * `ENOENT: mkdir '.bloom'` on Vercel.
+ * `ENOENT: mkdir '.livinup'` on Vercel.
  *
  * So the base a relative path resolves against is chosen from the runtime
  * rather than assumed: the project directory when there is a writable project
@@ -31,12 +31,12 @@ export type EnvLike = Readonly<Record<string, string | undefined>>
  * True when the process filesystem is a read-only deployment bundle and only
  * the OS temp directory can be written.
  *
- * `BLOOM_EPHEMERAL_DATA_DIR` overrides the detection in both directions, so a
+ * `LIVINUP_EPHEMERAL_DATA_DIR` overrides the detection in both directions, so a
  * platform we have not enumerated can be told the truth without a code change.
  */
 export function hasEphemeralFilesystem(env: EnvLike = process.env): boolean {
-  if (env.BLOOM_EPHEMERAL_DATA_DIR === '1') return true
-  if (env.BLOOM_EPHEMERAL_DATA_DIR === '0') return false
+  if (env.LIVINUP_EPHEMERAL_DATA_DIR === '1') return true
+  if (env.LIVINUP_EPHEMERAL_DATA_DIR === '0') return false
 
   return Boolean(
     env.VERCEL ||
@@ -76,10 +76,10 @@ export function resolvePgliteDataDir(
 
   if (hasEphemeralFilesystem(env)) {
     // Deliberately not `path.resolve(cwd, value)`: cwd is the read-only bundle.
-    // The basename keeps `.bloom/test-a` and `.bloom/test-b` from colliding
-    // without dragging the project-local `.bloom` prefix into the temp dir.
+    // The basename keeps `.livinup/test-a` and `.livinup/test-b` from colliding
+    // without dragging the project-local `.livinup` prefix into the temp dir.
     const name = path.basename(path.normalize(value)) || 'pgdata'
-    return { dir: path.join(os.tmpdir(), 'bloom', name), ephemeral: true }
+    return { dir: path.join(os.tmpdir(), 'livinup', name), ephemeral: true }
   }
 
   // `turbopackIgnore`: this is a directory to create at runtime, not a module

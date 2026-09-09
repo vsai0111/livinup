@@ -40,11 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Bloom
+# LivinUp
 .env
 .env.local
 .env.*.local
-.bloom/
+.livinup/
 /test-results/
 /playwright-report/
 /coverage/

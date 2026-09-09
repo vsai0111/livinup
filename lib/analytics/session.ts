@@ -13,7 +13,7 @@ import { cookies } from 'next/headers'
  * it is not used for tracking across sites.
  */
 
-export const SESSION_ID_COOKIE = 'bloom_sid'
+export const SESSION_ID_COOKIE = 'livinup_sid'
 const ONE_YEAR = 60 * 60 * 24 * 365
 
 export async function getSessionId(): Promise<string | null> {

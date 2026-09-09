@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * The core Bloom journey, end to end.
+ * The core LivinUp journey, end to end.
  *
  * This is the definition-of-done path from the product brief:
  *
@@ -14,7 +14,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 /** Unique per run so repeated runs do not collide on the email unique index. */
 function uniqueEmail(): string {
-  return `e2e-${Date.now()}-${Math.floor(Math.random() * 10_000)}@bloom.test`
+  return `e2e-${Date.now()}-${Math.floor(Math.random() * 10_000)}@livinup.test`
 }
 
 const PASSWORD = 'correct-horse-battery-staple'
@@ -140,7 +140,7 @@ test.describe('core journey', () => {
     await page.goto('/preferences')
     await expect(page.getByRole('heading', { name: 'Preferences' })).toBeVisible()
 
-    // The audit table must list what Bloom believes, with a way to remove it.
+    // The audit table must list what LivinUp believes, with a way to remove it.
     const table = page.getByRole('table', { name: /your preferences/i })
     await expect(table).toBeVisible()
     await expect(table.getByRole('button', { name: /^Remove/ }).first()).toBeVisible()

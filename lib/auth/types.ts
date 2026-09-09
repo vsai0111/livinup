@@ -3,7 +3,7 @@ import type { AuthUser } from '@/types/user'
 /**
  * The authentication seam.
  *
- * Bloom targets Supabase Auth in production. No Supabase project has been
+ * LivinUp targets Supabase Auth in production. No Supabase project has been
  * provisioned yet (see docs/development.md), so a local email/password provider
  * backed by the same database implements the identical interface, and the whole
  * product — signup, onboarding, personalisation, protected routes — is

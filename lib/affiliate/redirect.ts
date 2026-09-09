@@ -17,7 +17,7 @@ import { validateRedirectTarget } from '@/lib/utils/url'
  * *listing id*; this module looks up that listing's URL and validates it
  * against the owning merchant's registered host allowlist. A URL that fails
  * validation is not followed — a broken link is recoverable, an open redirect
- * on Bloom's domain is a phishing vector wearing our name.
+ * on LivinUp's domain is a phishing vector wearing our name.
  */
 
 export type ClickOutcome =

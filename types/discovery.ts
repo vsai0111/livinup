@@ -7,7 +7,7 @@ import type { OfferSummary, Product } from './catalog'
  * The shapes the discovery surfaces (home feed, search, product page) render.
  */
 
-/** A product plus the single offer Bloom would send the user to. */
+/** A product plus the single offer LivinUp would send the user to. */
 export interface ProductSummary {
   product: Product
   /** Best available offer: cheapest in-stock listing, tie-broken by merchant name. */

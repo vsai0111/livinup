@@ -19,7 +19,7 @@ import {
 } from './vocabulary'
 
 /**
- * Raw merchant data -> canonical Bloom product.
+ * Raw merchant data -> canonical LivinUp product.
  *
  * The contract: this function either returns a product that is safe to persist
  * and display, or it refuses with reasons. It never returns a partially-trusted
@@ -128,7 +128,7 @@ export function normalizeProduct(
   if (!category) category = inferCategoryFromTitle(titleText)
   if (!category) {
     errors.push(
-      `category could not be mapped to Bloom's taxonomy (merchant sent: ${String(raw.category ?? 'nothing')})`,
+      `category could not be mapped to LivinUp's taxonomy (merchant sent: ${String(raw.category ?? 'nothing')})`,
     )
   }
 

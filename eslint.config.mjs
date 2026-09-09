@@ -15,7 +15,7 @@ const eslintConfig = defineConfig([
     'playwright-report/**',
     'test-results/**',
     'pw-browsers/**',
-    '.bloom/**',
+    '.livinup/**',
   ]),
 
   {

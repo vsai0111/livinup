@@ -14,14 +14,14 @@ export function loadScriptEnv(): void {
 /** Print a short summary of where this script is about to write. */
 export function describeTarget(): string {
   const driver =
-    process.env.BLOOM_DB_DRIVER && process.env.BLOOM_DB_DRIVER !== 'auto'
-      ? process.env.BLOOM_DB_DRIVER
+    process.env.LIVINUP_DB_DRIVER && process.env.LIVINUP_DB_DRIVER !== 'auto'
+      ? process.env.LIVINUP_DB_DRIVER
       : process.env.DATABASE_URL
         ? 'postgres'
         : 'pglite'
 
   if (driver === 'pglite') {
-    return `embedded postgres (pglite) at ${process.env.PGLITE_DATA_DIR || '.bloom/pgdata'}`
+    return `embedded postgres (pglite) at ${process.env.PGLITE_DATA_DIR || '.livinup/pgdata'}`
   }
 
   // Never print the connection string: it contains the database password.

@@ -6,7 +6,7 @@ import type { EventType, UserEventInput } from '@/types/user'
 /**
  * Server-side event recording.
  *
- * Bloom's own database is the source of truth for the product funnel, not a
+ * LivinUp's own database is the source of truth for the product funnel, not a
  * third-party analytics tool. That matters for three reasons: the questions in
  * docs/analytics.md can be answered with SQL and no vendor account; the
  * behavioural learning loop reads the same events it writes; and the funnel

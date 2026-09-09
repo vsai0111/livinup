@@ -1,5 +1,5 @@
 /**
- * Bloom's controlled vocabulary.
+ * LivinUp's controlled vocabulary.
  *
  * Merchant feeds are messy and inconsistent. Every incoming product is mapped
  * onto the terms defined here during normalization (see services/normalization),

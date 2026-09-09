@@ -205,7 +205,7 @@ export interface SavedProductEntry {
 /**
  * The user's saved collection, with the price movement since each save.
  *
- * This is the one place Bloom can make a genuinely personal price claim —
+ * This is the one place LivinUp can make a genuinely personal price claim —
  * it compares against what the user themselves saw, not a market average.
  */
 export async function listSavedProducts(

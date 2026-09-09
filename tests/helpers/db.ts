@@ -33,7 +33,7 @@ export async function createTestDb(
   // plus indexes) exhausts it. On disk it pages normally and stays well within
   // budget. The directory is unique per call and removed on close, so tests
   // remain isolated from each other.
-  const dataDir = path.join('.bloom', `test-${randomBytes(6).toString('hex')}`)
+  const dataDir = path.join('.livinup', `test-${randomBytes(6).toString('hex')}`)
 
   const db = await createPgliteHandle(dataDir)
   await migrate(db)

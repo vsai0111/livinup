@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- Bloom 0001 — foundation: helpers, identity, preferences
+-- LivinUp 0001 — foundation: helpers, identity, preferences
 -- ---------------------------------------------------------------------------
 -- These migrations are written to run unchanged on Supabase Postgres and on the
 -- embedded PGlite instance used for development and tests. Anything that exists
@@ -24,11 +24,11 @@ end $$;
 -- ---------------------------------------------------------------------------
 -- Identity of the current request
 -- ---------------------------------------------------------------------------
--- On Supabase the user id arrives in the request JWT. When Bloom talks to
+-- On Supabase the user id arrives in the request JWT. When LivinUp talks to
 -- Postgres directly it is set per-transaction via `set_config('app.user_id', …)`
 -- (see lib/db/index.ts withUserContext). One function covers both so RLS
 -- policies never need to know which path they are on.
-create or replace function public.bloom_current_user_id()
+create or replace function public.livinup_current_user_id()
 returns uuid
 language sql
 stable
@@ -39,7 +39,7 @@ as $$
   );
 $$;
 
-create or replace function public.bloom_set_updated_at()
+create or replace function public.livinup_set_updated_at()
 returns trigger
 language plpgsql
 as $$
@@ -62,7 +62,7 @@ create table if not exists profiles (
 
 create trigger profiles_set_updated_at
   before update on profiles
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();
 
 -- Tie profiles to Supabase Auth when that schema is present.
 do $$
@@ -98,7 +98,7 @@ create unique index if not exists local_auth_users_email_key
 
 create trigger local_auth_users_set_updated_at
   before update on local_auth_users
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- user_preferences — the core personalisation input
@@ -129,4 +129,4 @@ create index if not exists user_preferences_user_attr
 
 create trigger user_preferences_set_updated_at
   before update on user_preferences
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();

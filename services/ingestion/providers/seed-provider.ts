@@ -16,7 +16,7 @@ import { slugify } from '@/services/normalization/vocabulary'
 /**
  * A MerchantProvider backed by the local seed catalogue.
  *
- * This exists so Bloom can be built, tested and demonstrated end to end without
+ * This exists so LivinUp can be built, tested and demonstrated end to end without
  * a merchant integration — see docs/product-data.md for what swapping in a real
  * feed involves. It is a full implementation of the interface, not a stub:
  * it paginates, it returns messy field shapes on purpose (mixed casing, string
@@ -204,7 +204,7 @@ export class SeedMerchantProvider implements MerchantProvider {
 
   /**
    * The seed merchants are fictional and have no affiliate programme, so this
-   * returns null rather than inventing a tracking URL. Bloom then links to the
+   * returns null rather than inventing a tracking URL. LivinUp then links to the
    * plain product URL and still records the click for its own analytics — the
    * same path a real merchant without an affiliate programme would take.
    */
@@ -216,7 +216,7 @@ export class SeedMerchantProvider implements MerchantProvider {
    * Full generated price history for a listing.
    *
    * Not part of the MerchantProvider interface: real merchants do not expose
-   * history, Bloom accumulates it by polling. Seeding uses this to backfill so
+   * history, LivinUp accumulates it by polling. Seeding uses this to backfill so
    * the deal engine has something to work with on day one.
    */
   historyFor(externalId: string): Array<{ price: number; recordedAt: Date }> {

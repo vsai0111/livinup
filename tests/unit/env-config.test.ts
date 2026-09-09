@@ -23,7 +23,7 @@ function setEnv(values: Record<string, string | undefined>): void {
 beforeEach(() => {
   setEnv({
     NODE_ENV: 'production',
-    BLOOM_DB_DRIVER: undefined,
+    LIVINUP_DB_DRIVER: undefined,
     DATABASE_URL: undefined,
     NEXT_PUBLIC_SUPABASE_URL: undefined,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: undefined,
@@ -38,22 +38,22 @@ afterEach(() => {
 
 describe('database driver selection in production', () => {
   it('refuses to guess when the driver is left at its default', () => {
-    expect(() => resolveDbDriver()).toThrow(/BLOOM_DB_DRIVER must be set explicitly/)
+    expect(() => resolveDbDriver()).toThrow(/LIVINUP_DB_DRIVER must be set explicitly/)
   })
 
   it('refuses `auto` even when DATABASE_URL happens to be present', () => {
     // The dangerous case is the inverse — a typo'd URL silently selecting
     // PGlite — so `auto` is rejected on its own terms, not on the URL's.
     setEnv({
-      BLOOM_DB_DRIVER: 'auto',
+      LIVINUP_DB_DRIVER: 'auto',
       DATABASE_URL: 'postgresql://user:pw@db.example.com:5432/postgres',
     })
-    expect(() => resolveDbDriver()).toThrow(/BLOOM_DB_DRIVER must be set explicitly/)
+    expect(() => resolveDbDriver()).toThrow(/LIVINUP_DB_DRIVER must be set explicitly/)
   })
 
   it('accepts an explicit postgres driver', () => {
     setEnv({
-      BLOOM_DB_DRIVER: 'postgres',
+      LIVINUP_DB_DRIVER: 'postgres',
       DATABASE_URL: 'postgresql://user:pw@db.example.com:5432/postgres',
     })
     expect(resolveDbDriver()).toBe('postgres')
@@ -61,12 +61,12 @@ describe('database driver selection in production', () => {
 
   it('still allows a deliberately chosen embedded database', () => {
     // The E2E suite runs a production build this way.
-    setEnv({ BLOOM_DB_DRIVER: 'pglite' })
+    setEnv({ LIVINUP_DB_DRIVER: 'pglite' })
     expect(resolveDbDriver()).toBe('pglite')
   })
 
   it('leaves development free to infer the driver', () => {
-    setEnv({ NODE_ENV: 'development', BLOOM_DB_DRIVER: 'auto' })
+    setEnv({ NODE_ENV: 'development', LIVINUP_DB_DRIVER: 'auto' })
     expect(resolveDbDriver()).toBe('pglite')
 
     setEnv({ DATABASE_URL: 'postgresql://user:pw@db.example.com:5432/postgres' })

@@ -126,7 +126,7 @@ history must not appear under a heading that asserts it is a good deal.
 "Trending" is a genuine aggregate over recorded events, not a placeholder. If
 there is not enough activity, the section does not appear.
 
-"Recently viewed" keeps the user's own chronological order rather than Bloom's
+"Recently viewed" keeps the user's own chronological order rather than LivinUp's
 ranking — it is their history, not a recommendation.
 
 ## Explanations

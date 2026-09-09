@@ -86,7 +86,7 @@ describe('merchant click-out', () => {
 
   it('refuses a destination outside the merchant host allowlist', async () => {
     // Simulates a poisoned feed: the listing URL points somewhere the merchant
-    // is not registered for. Bloom must not follow it.
+    // is not registered for. LivinUp must not follow it.
     const original = await context.db.query<{ product_url: string }>(
       `select product_url from merchant_products where id = $1`,
       [listingId],

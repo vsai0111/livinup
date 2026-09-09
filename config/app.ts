@@ -1,9 +1,9 @@
 /** Static application metadata and navigation. */
 
-export const APP_NAME = 'Bloom'
-export const APP_TAGLINE = 'Shop what suits you, when it is worth buying'
+export const APP_NAME = 'LivinUp'
+export const APP_TAGLINE = 'Level up your lifestyle.'
 export const APP_DESCRIPTION =
-  'Bloom learns what you like and tells you when it is genuinely a good time to buy.'
+  'LivinUp learns what you like and tells you when it is genuinely a good time to buy.'
 
 /** Primary authenticated navigation. */
 export const PRIMARY_NAV = [

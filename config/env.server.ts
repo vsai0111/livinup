@@ -12,18 +12,18 @@ import { logger } from '@/lib/logging/logger'
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
-  BLOOM_DB_DRIVER: z.enum(['auto', 'postgres', 'pglite']).default('auto'),
+  LIVINUP_DB_DRIVER: z.enum(['auto', 'postgres', 'pglite']).default('auto'),
   DATABASE_URL: z.string().url().optional().or(z.literal('')),
-  PGLITE_DATA_DIR: z.string().default('.bloom/pgdata'),
+  PGLITE_DATA_DIR: z.string().default('.livinup/pgdata'),
 
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional().or(z.literal('')),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional().or(z.literal('')),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional().or(z.literal('')),
 
-  BLOOM_AUTH_SECRET: z.string().optional().or(z.literal('')),
+  LIVINUP_AUTH_SECRET: z.string().optional().or(z.literal('')),
 
   SENTRY_DSN: z.string().optional().or(z.literal('')),
-  BLOOM_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  LIVINUP_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 })
 
 export type ServerEnv = z.infer<typeof schema>
@@ -47,7 +47,7 @@ export function serverEnv(): ServerEnv {
 
 /**
  * Supabase renamed the browser-safe API key from "anon key" to "publishable
- * key". Bloom reads only the current name.
+ * key". LivinUp reads only the current name.
  *
  * A deployment still carrying the old variable would therefore look
  * unconfigured, and `supabaseAuthConfigured()` would quietly hand back the
@@ -84,11 +84,11 @@ export function resetServerEnvCache(): void {
  */
 export function resolveDbDriver(): 'postgres' | 'pglite' {
   const env = serverEnv()
-  if (env.BLOOM_DB_DRIVER !== 'auto') return env.BLOOM_DB_DRIVER
+  if (env.LIVINUP_DB_DRIVER !== 'auto') return env.LIVINUP_DB_DRIVER
 
   if (env.NODE_ENV === 'production') {
     throw new Error(
-      'BLOOM_DB_DRIVER must be set explicitly in production. Set BLOOM_DB_DRIVER=postgres ' +
+      'LIVINUP_DB_DRIVER must be set explicitly in production. Set LIVINUP_DB_DRIVER=postgres ' +
         'together with DATABASE_URL (the Supabase pooler connection string). ' +
         '"auto" is not accepted in production because it falls back to the embedded PGlite ' +
         'database, which is per-instance and does not survive a cold start.',

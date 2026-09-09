@@ -22,7 +22,7 @@ export const metadata = { title: 'Preferences' }
  * Preferences.
  *
  * Two halves: the controlled vocabulary a user can pick from, and a full list
- * of everything Bloom currently believes — including behaviourally-learned
+ * of everything LivinUp currently believes — including behaviourally-learned
  * preferences with their weights. Nothing is hidden from the user.
  */
 export default async function PreferencesPage() {
@@ -40,7 +40,7 @@ export default async function PreferencesPage() {
         <h1 className="text-ink text-2xl font-semibold tracking-tight">Preferences</h1>
         <p className="text-ink-muted mt-1 text-sm">
           These drive your feed. Add or remove anything — changes take effect immediately, and
-          anything Bloom worked out from your activity is marked and can be deleted.
+          anything LivinUp worked out from your activity is marked and can be deleted.
         </p>
       </header>
 
@@ -98,7 +98,7 @@ export default async function PreferencesPage() {
       <section className="border-line bg-surface rounded-[var(--radius-card)] border p-5">
         <h2 className="text-ink text-sm font-semibold">How these are used</h2>
         <ul className="text-ink-muted mt-3 space-y-2 text-sm">
-          <li>Preferences you set yourself outrank anything Bloom infers from your behaviour.</li>
+          <li>Preferences you set yourself outrank anything LivinUp infers from your behaviour.</li>
           <li>
             A preference is only learned from your activity after the same signal repeats, so one
             curious click does not become a stated taste.

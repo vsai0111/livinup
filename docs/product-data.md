@@ -3,7 +3,7 @@
 ## Current status: no live merchant feed
 
 **No merchant API, affiliate feed, or data partnership has been contracted or
-verified.** Bloom therefore runs on a hand-authored seed catalogue that enters
+verified.** LivinUp therefore runs on a hand-authored seed catalogue that enters
 the system through exactly the same interface a real feed would use.
 
 Everything downstream — normalization, matching, deal scoring, ranking, search —
@@ -189,7 +189,7 @@ came from.
 
 To move from seed data to real products:
 
-1. **An affiliate network account or direct merchant agreement** — Bloom cannot
+1. **An affiliate network account or direct merchant agreement** — LivinUp cannot
    sign up for one. This is the blocking dependency.
 2. **Feed or API credentials**, plus documentation of the format.
 3. **Confirmation of the terms of use**, specifically whether caching product

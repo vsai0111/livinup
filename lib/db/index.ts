@@ -15,7 +15,7 @@ export { createDbHandle } from './connect'
  * pool (and one PGlite instance) instead of leaking a new one per reload.
  */
 declare global {
-  var __bloomDb: Promise<DbHandle> | undefined
+  var __livinupDb: Promise<DbHandle> | undefined
 }
 
 async function connect(): Promise<DbHandle> {
@@ -46,20 +46,20 @@ async function bootstrapEmbedded(db: DbHandle): Promise<void> {
 
 /** Get the shared database handle, connecting on first use. */
 export function getDb(): Promise<DbHandle> {
-  if (!globalThis.__bloomDb) {
-    globalThis.__bloomDb = connect().catch((error: unknown) => {
+  if (!globalThis.__livinupDb) {
+    globalThis.__livinupDb = connect().catch((error: unknown) => {
       // Never cache a failed connection: the next request should retry.
-      globalThis.__bloomDb = undefined
+      globalThis.__livinupDb = undefined
       throw error
     })
   }
-  return globalThis.__bloomDb
+  return globalThis.__livinupDb
 }
 
 /** Close and forget the shared handle. Used by tests and shutdown paths. */
 export async function closeDb(): Promise<void> {
-  const pending = globalThis.__bloomDb
-  globalThis.__bloomDb = undefined
+  const pending = globalThis.__livinupDb
+  globalThis.__livinupDb = undefined
   if (!pending) return
   try {
     const handle = await pending
@@ -78,7 +78,7 @@ export function currentDriver(): 'postgres' | 'pglite' {
  * Run `fn` with the Postgres session bound to `userId`, so row-level security
  * policies evaluate against that user.
  *
- * Note this is defence in depth, not the primary control: Bloom's server
+ * Note this is defence in depth, not the primary control: LivinUp's server
  * connects as a trusted role that RLS does not constrain, so repository queries
  * additionally scope by `user_id` explicitly. See docs/database.md.
  */

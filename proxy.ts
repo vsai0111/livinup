@@ -17,7 +17,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * a broken matcher costs a redirect, not a data leak.
  */
 
-const SESSION_COOKIES = ['bloom_session', 'sb-access-token']
+const SESSION_COOKIES = ['livinup_session', 'sb-access-token']
 
 /** Paths that require a session. Everything else is public. */
 const PROTECTED_PREFIXES = [

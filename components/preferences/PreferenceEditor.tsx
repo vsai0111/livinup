@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils/cn'
 /**
  * Preference editor.
  *
- * Everything Bloom believes about a user is listed here and can be removed in
+ * Everything LivinUp believes about a user is listed here and can be removed in
  * one click, including preferences it inferred from behaviour. If the system
  * learns something wrong, the user must be able to see it and delete it —
  * otherwise a bad inference is permanent and invisible.

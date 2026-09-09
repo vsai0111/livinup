@@ -32,7 +32,7 @@ export const getCurrentUser = cache(async () => {
 })
 
 /**
- * The user together with their Bloom profile, creating the profile on first
+ * The user together with their LivinUp profile, creating the profile on first
  * sight.
  *
  * Profile creation is idempotent (`on conflict do nothing`) and lazy rather

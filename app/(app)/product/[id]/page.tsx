@@ -171,8 +171,8 @@ export default async function ProductPage({ params }: PageProps<'/product/[id]'>
           </div>
 
           <p className="text-ink-subtle mt-3 text-xs">
-            Bloom may earn a commission on purchases made through this link. It does not change the
-            price you pay or how this product was ranked.
+            LivinUp may earn a commission on purchases made through this link. It does not change
+            the price you pay or how this product was ranked.
           </p>
         </div>
       </div>

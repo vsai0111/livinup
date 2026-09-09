@@ -191,7 +191,7 @@ export async function buildHomeFeed(db: Db, context: FeedContext): Promise<FeedS
       sections.push({
         id: 'trending',
         title: 'Trending for you',
-        subtitle: 'Getting attention from other Bloom shoppers',
+        subtitle: 'Getting attention from other LivinUp shoppers',
         items,
       })
     }

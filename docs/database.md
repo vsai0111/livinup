@@ -140,13 +140,13 @@ Policy shape:
 - **`local_auth_users`**: RLS enabled with _zero_ policies, plus an explicit
   `revoke`. Password hashes are unreachable by any client role.
 
-Identity comes from `bloom_current_user_id()`, which reads the Supabase JWT
-claim or, when Bloom talks to Postgres directly, a per-transaction
+Identity comes from `livinup_current_user_id()`, which reads the Supabase JWT
+claim or, when LivinUp talks to Postgres directly, a per-transaction
 `app.user_id` setting. One function covers both paths.
 
 ### Defence in depth
 
-Bloom's server connects as a trusted role that RLS does **not** constrain. So
+LivinUp's server connects as a trusted role that RLS does **not** constrain. So
 RLS is not the primary server-side control — every repository query additionally
 scopes by `user_id` explicitly:
 

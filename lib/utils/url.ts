@@ -3,7 +3,7 @@
  *
  * Merchant feeds are untrusted input. A product URL that is actually
  * `javascript:` or `data:` becomes stored XSS the moment it is rendered into an
- * href, and an unvalidated outbound redirect turns Bloom into an open redirect
+ * href, and an unvalidated outbound redirect turns LivinUp into an open redirect
  * that phishing campaigns can borrow our domain for. Both are closed here.
  */
 

@@ -133,7 +133,7 @@ separate store.
 
 **Status:** Accepted
 
-**Context.** Bloom's server connects as a trusted role, which RLS does not
+**Context.** LivinUp's server connects as a trusted role, which RLS does not
 constrain. It would be easy to conclude RLS is therefore pointless here.
 
 **Decision.** Both. RLS policies on every user table, _and_ every repository
@@ -225,7 +225,7 @@ never a URL. The destination is looked up and validated against
 `merchants.allowed_hosts` before any redirect. An empty allowlist denies
 everything.
 
-**Rationale.** Accepting a URL parameter would make Bloom an open redirect —
+**Rationale.** Accepting a URL parameter would make LivinUp an open redirect —
 a phishing vector wearing our domain. Host matching is anchored on a dot
 boundary so `evil-example.com` cannot satisfy an allowlist entry of
 `example.com`.
@@ -277,7 +277,7 @@ on a read-only serverless runtime. Absolute paths are honoured as given.
 Migrations and the PGlite WASM image are added to the build's file tracing,
 since both are read from disk at runtime rather than imported.
 
-**Rationale.** The default `.bloom/pgdata` is relative, and a relative path is
+**Rationale.** The default `.livinup/pgdata` is relative, and a relative path is
 meaningless without knowing what it is relative _to_. On Vercel that was the
 read-only deployment bundle, so the first request that touched the database died
 in `mkdir` and returned a 500. The driver had assumed a writable project
@@ -297,7 +297,7 @@ failure mode is an honest warning instead of a crash.
 **Status:** Accepted. Supersedes the "deployment without DATABASE_URL serves"
 consequence of [ADR-0015](#adr-0015--the-embedded-database-resolves-its-location-from-the-runtime-not-the-project).
 
-**Decision.** `resolveDbDriver()` refuses `BLOOM_DB_DRIVER=auto` when
+**Decision.** `resolveDbDriver()` refuses `LIVINUP_DB_DRIVER=auto` when
 `NODE_ENV=production`. Production sets `postgres` (with `DATABASE_URL`) or, for
 a deliberate throwaway deployment, `pglite`. Development and test are unchanged.
 
@@ -309,7 +309,7 @@ throwaway database is a worse failure than refusing to boot, because nothing
 about it looks wrong until user data goes missing.
 
 **Consequences.** A production deployment that has not yet been given a
-`DATABASE_URL` must say `BLOOM_DB_DRIVER=pglite` out loud to keep serving. The
+`DATABASE_URL` must say `LIVINUP_DB_DRIVER=pglite` out loud to keep serving. The
 E2E suite already does this, since it runs a production build against the
 embedded database.
 
@@ -319,7 +319,7 @@ embedded database.
 
 **Status:** Accepted
 
-**Decision.** Bloom reads `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The former
+**Decision.** LivinUp reads `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The former
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` is not read, and a configuration carrying only
 the old name fails the boot in production (a warning in development). No
 elevated Supabase API key — service-role or secret — is read anywhere in the

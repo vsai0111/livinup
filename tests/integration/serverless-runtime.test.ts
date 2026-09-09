@@ -10,8 +10,8 @@ import { createDbHandle } from '@/lib/db/connect'
  *
  * `GET /` reaches `getDb()`, which on a deployment with no `DATABASE_URL`
  * resolves to the embedded driver. Previously that driver called
- * `mkdir('.bloom/pgdata')`, which resolves against `process.cwd()` — the
- * read-only deployment bundle — and produced `ENOENT: mkdir '.bloom'` on every
+ * `mkdir('.livinup/pgdata')`, which resolves against `process.cwd()` — the
+ * read-only deployment bundle — and produced `ENOENT: mkdir '.livinup'` on every
  * request.
  *
  * This test stands in a fake, empty project root and asserts that connecting
@@ -24,7 +24,7 @@ const SAVED_CWD = process.cwd()
 let projectRoot: string
 
 beforeEach(async () => {
-  projectRoot = await mkdtemp(path.join(os.tmpdir(), 'bloom-project-'))
+  projectRoot = await mkdtemp(path.join(os.tmpdir(), 'livinup-project-'))
   // A real `chdir`, not a mocked `process.cwd()`: the bug was an OS-level
   // relative `mkdir`, which a spy on `process.cwd()` would not have affected.
   // Standing in an empty directory is what makes the assertions below real.
@@ -33,7 +33,7 @@ beforeEach(async () => {
   // The Vercel environment as it actually arrives: serverless, embedded driver
   // by default, and no data directory configured.
   process.env.VERCEL = '1'
-  process.env.BLOOM_DB_DRIVER = 'auto'
+  process.env.LIVINUP_DB_DRIVER = 'auto'
   delete process.env.DATABASE_URL
   delete process.env.PGLITE_DATA_DIR
   resetServerEnvCache()
@@ -44,7 +44,7 @@ afterEach(async () => {
   process.env = { ...SAVED }
   resetServerEnvCache()
   await rm(projectRoot, { recursive: true, force: true })
-  await rm(path.join(os.tmpdir(), 'bloom'), { recursive: true, force: true }).catch(() => {})
+  await rm(path.join(os.tmpdir(), 'livinup'), { recursive: true, force: true }).catch(() => {})
 })
 
 describe('connecting from a serverless runtime', () => {
@@ -60,13 +60,13 @@ describe('connecting from a serverless runtime', () => {
       await db.close()
     }
 
-    // The regression itself: nothing — least of all `.bloom` — is created
+    // The regression itself: nothing — least of all `.livinup` — is created
     // beneath the (read-only, in production) project root.
     expect(await readdir(projectRoot)).toEqual([])
   })
 
   it('still fails loudly when Postgres is demanded without a connection string', async () => {
-    process.env.BLOOM_DB_DRIVER = 'postgres'
+    process.env.LIVINUP_DB_DRIVER = 'postgres'
     resetServerEnvCache()
 
     await expect(createDbHandle()).rejects.toThrow(/DATABASE_URL/)

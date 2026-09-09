@@ -13,7 +13,7 @@ import {
 } from '@/config/taxonomy'
 
 /**
- * Mapping merchant vocabulary onto Bloom's taxonomy.
+ * Mapping merchant vocabulary onto LivinUp's taxonomy.
  *
  * Entirely deterministic: a lookup table plus whole-word matching. Nothing here
  * guesses, and nothing calls a model. A term that is not recognised returns

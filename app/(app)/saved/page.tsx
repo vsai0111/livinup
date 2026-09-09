@@ -11,7 +11,7 @@ export const metadata = { title: 'Saved' }
 /**
  * Saved products, with price movement since the moment each was saved.
  *
- * This is the one place Bloom can make a genuinely personal price statement:
+ * This is the one place LivinUp can make a genuinely personal price statement:
  * it compares against the price this user actually saw, not a market average.
  */
 export default async function SavedPage() {
@@ -43,7 +43,7 @@ export default async function SavedPage() {
       {entries.length === 0 ? (
         <EmptyState
           title="Nothing saved yet"
-          description="Save anything you are considering and Bloom will track its price and tell you when it moves."
+          description="Save anything you are considering and LivinUp will track its price and tell you when it moves."
           action={<ButtonLink href="/home">Back to your feed</ButtonLink>}
         />
       ) : (

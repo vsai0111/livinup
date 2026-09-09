@@ -13,12 +13,12 @@ const scrypt = promisify(scryptCallback) as (
  * Password hashing for the local auth provider.
  *
  * scrypt from Node's standard library: memory-hard, no dependency, and
- * available on every runtime Bloom targets. Parameters are stored inside the
+ * available on every runtime LivinUp targets. Parameters are stored inside the
  * hash string so they can be raised later without invalidating existing
  * passwords.
  *
  * When Supabase Auth is configured this file is unused — Supabase does its own
- * hashing and Bloom never sees a password.
+ * hashing and LivinUp never sees a password.
  */
 
 const PARAMS = { N: 16_384, r: 8, p: 1 }

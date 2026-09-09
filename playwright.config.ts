@@ -27,10 +27,10 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
     env: {
-      BLOOM_DB_DRIVER: 'pglite',
-      PGLITE_DATA_DIR: '.bloom/e2e-pgdata',
-      BLOOM_AUTH_SECRET: 'e2e-secret-0000000000000000000000000000',
-      BLOOM_LOG_LEVEL: 'error',
+      LIVINUP_DB_DRIVER: 'pglite',
+      PGLITE_DATA_DIR: '.livinup/e2e-pgdata',
+      LIVINUP_AUTH_SECRET: 'e2e-secret-0000000000000000000000000000',
+      LIVINUP_LOG_LEVEL: 'error',
       /*
        * Force the local auth provider and the embedded database.
        *

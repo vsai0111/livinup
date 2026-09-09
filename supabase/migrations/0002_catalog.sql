@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- Bloom 0002 — catalogue: merchants, canonical products, listings, pricing
+-- LivinUp 0002 — catalogue: merchants, canonical products, listings, pricing
 -- ---------------------------------------------------------------------------
 
 -- ---------------------------------------------------------------------------
@@ -22,7 +22,7 @@ create table if not exists merchants (
 
 create trigger merchants_set_updated_at
   before update on merchants
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- products — the canonical, merchant-independent product
@@ -53,7 +53,7 @@ create table if not exists products (
 
 create trigger products_set_updated_at
   before update on products
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();
 
 -- Weighted full-text search vector. Title and brand rank above taxonomy, which
 -- ranks above free-text description.
@@ -94,7 +94,7 @@ create index if not exists product_variants_product_idx on product_variants (pro
 
 create trigger product_variants_set_updated_at
   before update on product_variants
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- merchant_products — one merchant's listing of a canonical product
@@ -138,7 +138,7 @@ create index if not exists merchant_products_available_idx
 
 create trigger merchant_products_set_updated_at
   before update on merchant_products
-  for each row execute function public.bloom_set_updated_at();
+  for each row execute function public.livinup_set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- product_images

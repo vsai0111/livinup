@@ -59,7 +59,7 @@ export async function GET(
     })
 
     const response = NextResponse.redirect(outcome.destination, 302)
-    // Do not leak the user's Bloom page path to the merchant.
+    // Do not leak the user's LivinUp page path to the merchant.
     response.headers.set('Referrer-Policy', 'no-referrer')
     response.headers.set('Cache-Control', 'no-store')
     return response

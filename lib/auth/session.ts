@@ -16,7 +16,7 @@ import { serverEnv } from '@/config/env.server'
  * cookie. Revocation would need that table — noted in docs/decisions.md.
  */
 
-export const SESSION_COOKIE = 'bloom_session'
+export const SESSION_COOKIE = 'livinup_session'
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30
 
 interface SessionPayload {
@@ -27,23 +27,23 @@ interface SessionPayload {
 }
 
 function secret(): string {
-  const configured = serverEnv().BLOOM_AUTH_SECRET
+  const configured = serverEnv().LIVINUP_AUTH_SECRET
   if (configured && configured.length >= 16) return configured
 
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      'BLOOM_AUTH_SECRET must be set (32+ random bytes) when using the local auth provider in production.',
+      'LIVINUP_AUTH_SECRET must be set (32+ random bytes) when using the local auth provider in production.',
     )
   }
 
   // Development convenience only: a per-process key. Restarting the dev server
   // invalidates sessions, which is a fair trade for not requiring setup.
-  globalThis.__bloomDevAuthSecret ??= randomBytes(32).toString('hex')
-  return globalThis.__bloomDevAuthSecret
+  globalThis.__livinupDevAuthSecret ??= randomBytes(32).toString('hex')
+  return globalThis.__livinupDevAuthSecret
 }
 
 declare global {
-  var __bloomDevAuthSecret: string | undefined
+  var __livinupDevAuthSecret: string | undefined
 }
 
 function base64url(input: Buffer | string): string {

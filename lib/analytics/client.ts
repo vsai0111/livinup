@@ -29,7 +29,7 @@ async function client() {
       posthog.init(publicEnv.posthogKey, {
         api_host: publicEnv.posthogHost,
         capture_pageview: false,
-        // Bloom sends its own events; autocapture would record clicks on
+        // LivinUp sends its own events; autocapture would record clicks on
         // everything, including values we deliberately keep out of analytics.
         autocapture: false,
         persistence: 'localStorage+cookie',

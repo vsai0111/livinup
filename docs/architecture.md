@@ -1,6 +1,6 @@
 # Architecture
 
-Bloom is a personalised shopping discovery and price-intelligence layer. It is
+LivinUp is a personalised shopping discovery and price-intelligence layer. It is
 not a marketplace, a checkout, or a payment platform. It helps someone find
 products that suit them and decide whether now is a sensible time to buy.
 
@@ -62,7 +62,7 @@ Consequences worth knowing:
 
 ## The seams
 
-Five interfaces exist because Bloom will predictably need to swap what is behind
+Five interfaces exist because LivinUp will predictably need to swap what is behind
 them. Each has exactly one implementation today; none has speculative
 configuration.
 
@@ -82,7 +82,7 @@ caller is dead weight.
 
 No Supabase project has been provisioned, and Docker is not available in the
 development environment. Rather than mock the database — which would let broken
-SQL pass tests — Bloom runs **PostgreSQL 18 in-process** via PGlite for
+SQL pass tests — LivinUp runs **PostgreSQL 18 in-process** via PGlite for
 development, tests and CI, and connects to Supabase Postgres in production.
 
 The same migrations, indexes, constraints, RLS policies and queries execute
@@ -118,7 +118,7 @@ Rules that hold throughout:
 
 ## Where the product logic lives
 
-The three pieces that constitute Bloom's actual value are all pure, deterministic
+The three pieces that constitute LivinUp's actual value are all pure, deterministic
 TypeScript with no I/O, which makes them directly testable:
 
 - `lib/deals/engine.ts` — price statistics and deal scoring

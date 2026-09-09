@@ -6,7 +6,7 @@ import type { UserPreference } from '@/types/user'
 import { humanize } from '@/lib/utils/format'
 
 /**
- * Everything Bloom currently believes, in one auditable list.
+ * Everything LivinUp currently believes, in one auditable list.
  *
  * Includes weights and where each belief came from. This is the accountability
  * surface for personalisation: a user can see that "we think you like olive,
@@ -19,7 +19,7 @@ export function LearnedPreferences({ preferences }: { preferences: UserPreferenc
   if (preferences.length === 0) {
     return (
       <section className="border-line bg-surface rounded-[var(--radius-card)] border p-5">
-        <h2 className="text-ink text-sm font-semibold">Everything Bloom knows about you</h2>
+        <h2 className="text-ink text-sm font-semibold">Everything LivinUp knows about you</h2>
         <p className="text-ink-muted mt-2 text-sm">
           Nothing yet. Pick a few options above, or just start saving and liking things.
         </p>
@@ -39,7 +39,7 @@ export function LearnedPreferences({ preferences }: { preferences: UserPreferenc
 
   return (
     <section className="border-line bg-surface rounded-[var(--radius-card)] border p-5">
-      <h2 className="text-ink text-sm font-semibold">Everything Bloom knows about you</h2>
+      <h2 className="text-ink text-sm font-semibold">Everything LivinUp knows about you</h2>
       <p className="text-ink-muted mt-1 text-xs">
         {preferences.length} preference{preferences.length === 1 ? '' : 's'}, strongest first.
         Weight is how much each one counts when ranking.

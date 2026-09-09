@@ -99,7 +99,7 @@ export function AuthForm({
       </form>
 
       <p className="text-ink-muted mt-6 text-sm">
-        {isSignUp ? 'Already have an account? ' : 'New to Bloom? '}
+        {isSignUp ? 'Already have an account? ' : 'New to LivinUp? '}
         <Link
           href={isSignUp ? '/signin' : '/signup'}
           className="text-accent-strong font-medium underline underline-offset-2"

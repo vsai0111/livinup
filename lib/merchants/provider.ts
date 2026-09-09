@@ -1,7 +1,7 @@
 /**
  * The merchant data seam.
  *
- * Bloom must never be architected around one retailer. Every source of product
+ * LivinUp must never be architected around one retailer. Every source of product
  * data — an affiliate network feed, a partner API, a CSV drop, or the local seed
  * catalogue — is expressed as a `MerchantProvider`, and the ingestion pipeline
  * knows nothing else about where products came from.
@@ -16,7 +16,7 @@
  * required to add a real one.
  */
 
-/** A product exactly as a merchant describes it, before any Bloom processing. */
+/** A product exactly as a merchant describes it, before any LivinUp processing. */
 export interface RawMerchantProduct {
   /** The merchant's own stable identifier for this listing. Required. */
   externalId: string
@@ -79,7 +79,7 @@ export interface MerchantDescriptor {
   logoUrl?: string
   /**
    * Hostnames this merchant is permitted to receive redirects on. Enforced at
-   * click time so a compromised or malformed feed cannot turn Bloom into an
+   * click time so a compromised or malformed feed cannot turn LivinUp into an
    * open redirect.
    */
   allowedHosts: string[]
@@ -121,14 +121,14 @@ export interface MerchantProvider {
    * Turn a product URL into a trackable affiliate URL.
    *
    * Returns null when the merchant has no affiliate programme configured, in
-   * which case Bloom sends the user to the plain product URL and records the
+   * which case LivinUp sends the user to the plain product URL and records the
    * click for its own analytics.
    */
   getAffiliateUrl(product: RawMerchantProduct, context: AffiliateContext): Promise<string | null>
 }
 
 export interface AffiliateContext {
-  /** Bloom's own click id, so a merchant postback can be tied back to a click row. */
+  /** LivinUp's own click id, so a merchant postback can be tied back to a click row. */
   clickId: string
   userId?: string | null
 }

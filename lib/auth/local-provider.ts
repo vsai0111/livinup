@@ -8,7 +8,7 @@ import { clearSessionCookie, readSessionUserId, setSessionCookie } from './sessi
 /**
  * Local email/password authentication.
  *
- * Used when Supabase Auth is not configured, so Bloom is fully usable in
+ * Used when Supabase Auth is not configured, so LivinUp is fully usable in
  * development and CI without external credentials. Credentials live in
  * `local_auth_users`, which has RLS enabled and no policies — meaning no
  * client-facing role can read it at all.

@@ -73,7 +73,7 @@ describe('secondsUntilTokenExpiry', () => {
 
   it('returns null when there is no Supabase auth cookie', () => {
     expect(secondsUntilTokenExpiry([])).toBeNull()
-    expect(secondsUntilTokenExpiry([{ name: 'bloom_sid', value: 'abc' }])).toBeNull()
+    expect(secondsUntilTokenExpiry([{ name: 'livinup_sid', value: 'abc' }])).toBeNull()
   })
 
   it('returns null rather than throwing on an unreadable cookie', () => {
@@ -87,8 +87,8 @@ describe('secondsUntilTokenExpiry', () => {
 
   it('ignores cookies belonging to other concerns', () => {
     const remaining = secondsUntilTokenExpiry([
-      { name: 'bloom_sid', value: 'session-id' },
-      { name: 'bloom_session', value: 'local-provider-token' },
+      { name: 'livinup_sid', value: 'session-id' },
+      { name: 'livinup_session', value: 'local-provider-token' },
       sessionCookie({ expires_at: NOW() + 2400 }),
     ])
 

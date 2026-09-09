@@ -2,7 +2,7 @@
 
 ## Where events live
 
-Bloom's own `user_events` table is the source of truth. PostHog, if configured,
+LivinUp's own `user_events` table is the source of truth. PostHog, if configured,
 is a mirror for exploration — never the record.
 
 Three reasons for that: the questions below can be answered with SQL and no
@@ -170,6 +170,6 @@ merchant_clicked
 return visit on a later day
 ```
 
-Conversion is not measurable in Phase 1 — Bloom does not own checkout. The
+Conversion is not measurable in Phase 1 — LivinUp does not own checkout. The
 `affiliate_clicks` conversion columns exist for when merchant postbacks are
 available.

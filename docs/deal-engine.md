@@ -1,6 +1,6 @@
 # Deal engine
 
-`lib/deals/engine.ts`. Pure, deterministic, and the one part of Bloom where
+`lib/deals/engine.ts`. Pure, deterministic, and the one part of LivinUp where
 being wrong actively harms the user.
 
 ## Principles
@@ -102,7 +102,7 @@ _bad_ moment to buy. A tool that only ever says "buy now" is an advertisement.
 
 Never claim: _best price_, _lowest price_, _guaranteed discount_, _best product_.
 
-Bloom sees only the merchants it has ingested. A global "lowest price" claim
+LivinUp sees only the merchants it has ingested. A global "lowest price" claim
 from a partial view is false, which is why `OfferList` compares merchants
 without ever declaring a winner.
 

@@ -12,7 +12,7 @@ These require your action; they cannot be done from the codebase.
 2. **Create a Vercel project** and connect the repository.
 3. **Set environment variables** (below).
 4. **Apply migrations** to the Supabase database.
-5. **Decide on a domain.** The name "Bloom" has **not** been checked for
+5. **Decide on a domain.** The name "LivinUp" has **not** been checked for
    trademark, domain or app-store availability. Do that before committing to it
    publicly.
 
@@ -21,19 +21,19 @@ These require your action; they cannot be done from the codebase.
 Every variable is documented in `.env.example`. The ones that matter in
 production:
 
-| Variable                               | Required                   | Notes                                                                                          |
-| -------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                         | Yes                        | Supabase pooler connection string. Absent → the ephemeral embedded database (see below)        |
-| `BLOOM_DB_DRIVER`                      | **Yes**                    | Must be `postgres` in production. `auto` is refused there — see below                          |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Yes                        | Enables Supabase Auth                                                                          |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes                        | Supabase's renamed anon key. Public by design — RLS is what makes it safe                      |
-| `SUPABASE_SERVICE_ROLE_KEY`            | No — do not set            | Nothing in Bloom reads it. Setting it adds an RLS-bypass credential for no gain                |
-| `BLOOM_AUTH_SECRET`                    | If not using Supabase Auth | 32+ random bytes. The app refuses to start the local provider in production without it         |
-| `NEXT_PUBLIC_APP_URL`                  | Yes                        | Absolute URL of the deployment                                                                 |
-| `NEXT_PUBLIC_POSTHOG_KEY`              | Optional                   | Absent → no analytics network calls at all                                                     |
-| `SENTRY_DSN`                           | Optional                   | See below                                                                                      |
-| `BLOOM_LOG_LEVEL`                      | Optional                   | `info` in production                                                                           |
-| `BLOOM_EPHEMERAL_DATA_DIR`             | Rarely                     | `1`/`0` to force the temp-directory data dir on a read-only runtime Bloom does not auto-detect |
+| Variable                               | Required                   | Notes                                                                                            |
+| -------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`                         | Yes                        | Supabase pooler connection string. Absent → the ephemeral embedded database (see below)          |
+| `LIVINUP_DB_DRIVER`                    | **Yes**                    | Must be `postgres` in production. `auto` is refused there — see below                            |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Yes                        | Enables Supabase Auth                                                                            |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes                        | Supabase's renamed anon key. Public by design — RLS is what makes it safe                        |
+| `SUPABASE_SERVICE_ROLE_KEY`            | No — do not set            | Nothing in LivinUp reads it. Setting it adds an RLS-bypass credential for no gain                |
+| `LIVINUP_AUTH_SECRET`                  | If not using Supabase Auth | 32+ random bytes. The app refuses to start the local provider in production without it           |
+| `NEXT_PUBLIC_APP_URL`                  | Yes                        | Absolute URL of the deployment                                                                   |
+| `NEXT_PUBLIC_POSTHOG_KEY`              | Optional                   | Absent → no analytics network calls at all                                                       |
+| `SENTRY_DSN`                           | Optional                   | See below                                                                                        |
+| `LIVINUP_LOG_LEVEL`                    | Optional                   | `info` in production                                                                             |
+| `LIVINUP_EPHEMERAL_DATA_DIR`           | Rarely                     | `1`/`0` to force the temp-directory data dir on a read-only runtime LivinUp does not auto-detect |
 
 Generate an auth secret:
 
@@ -47,11 +47,11 @@ compiled into the browser bundle.
 
 ## Production must name its database driver
 
-`BLOOM_DB_DRIVER=auto` is a development convenience and is **refused in
+`LIVINUP_DB_DRIVER=auto` is a development convenience and is **refused in
 production**. Booting with it unset (or set to `auto`) raises:
 
 ```
-BLOOM_DB_DRIVER must be set explicitly in production. Set BLOOM_DB_DRIVER=postgres
+LIVINUP_DB_DRIVER must be set explicitly in production. Set LIVINUP_DB_DRIVER=postgres
 together with DATABASE_URL (the Supabase pooler connection string).
 ```
 
@@ -63,7 +63,7 @@ start — losing accounts, saved products and learned preferences. A silent
 downgrade to a throwaway database is worse than a failed boot, so production has
 to say what it wants.
 
-`BLOOM_DB_DRIVER=pglite` remains available in production for exactly that
+`LIVINUP_DB_DRIVER=pglite` remains available in production for exactly that
 throwaway mode (the E2E suite runs a production build this way), but it must now
 be chosen deliberately. Every cold start on the embedded driver logs a warning.
 
@@ -73,7 +73,7 @@ Migrations are plain SQL and are **not** applied automatically against a remote
 database. Either:
 
 ```bash
-DATABASE_URL="postgresql://..." BLOOM_DB_DRIVER=postgres npm run db:migrate
+DATABASE_URL="postgresql://..." LIVINUP_DB_DRIVER=postgres npm run db:migrate
 ```
 
 or apply `supabase/migrations/*.sql` in filename order via the Supabase CLI or
@@ -82,7 +82,7 @@ SQL editor.
 Then seed the catalogue if you want the demonstration data:
 
 ```bash
-DATABASE_URL="postgresql://..." BLOOM_DB_DRIVER=postgres npm run db:seed
+DATABASE_URL="postgresql://..." LIVINUP_DB_DRIVER=postgres npm run db:seed
 ```
 
 Seeding is idempotent. Note that every seeded price observation is written with
@@ -145,9 +145,9 @@ returns a short reference id that is safe to show a user.
 - [ ] `npm run verify` passes (typecheck, lint, 182 tests)
 - [ ] `npm run test:e2e` passes against a production build
 - [ ] Migrations applied; RLS verified with the query above
-- [ ] `BLOOM_DB_DRIVER=postgres` set, so a missing `DATABASE_URL` fails loudly
+- [ ] `LIVINUP_DB_DRIVER=postgres` set, so a missing `DATABASE_URL` fails loudly
       rather than falling back to the ephemeral embedded database
-- [ ] `BLOOM_AUTH_SECRET` set (or Supabase Auth configured)
+- [ ] `LIVINUP_AUTH_SECRET` set (or Supabase Auth configured)
 - [ ] No `NEXT_PUBLIC_*` variable contains a secret
 - [ ] `images.remotePatterns` narrowed to real merchant hosts
 - [ ] Merchant `allowed_hosts` populated for every active merchant

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { hasEphemeralFilesystem, resolvePgliteDataDir, type EnvLike } from '@/lib/db/data-dir'
 
 /**
- * Regression cover for the Vercel 500: `ENOENT: mkdir '.bloom'`.
+ * Regression cover for the Vercel 500: `ENOENT: mkdir '.livinup'`.
  *
  * The embedded driver used to `mkdir` its configured `PGLITE_DATA_DIR`
  * verbatim. That value is project-relative by default, so on a serverless
@@ -14,7 +14,7 @@ import { hasEphemeralFilesystem, resolvePgliteDataDir, type EnvLike } from '@/li
  */
 
 /** The shipped default from config/env.server.ts. */
-const DEFAULT_DATA_DIR = '.bloom/pgdata'
+const DEFAULT_DATA_DIR = '.livinup/pgdata'
 
 const SERVERLESS: EnvLike = { VERCEL: '1' }
 const WORKSTATION: EnvLike = {}
@@ -32,9 +32,9 @@ function isInside(parent: string, child: string): boolean {
 }
 
 describe('ephemeral filesystem detection', () => {
-  it('recognises the serverless runtimes Bloom is deployed to', () => {
+  it('recognises the serverless runtimes LivinUp is deployed to', () => {
     expect(hasEphemeralFilesystem({ VERCEL: '1' })).toBe(true)
-    expect(hasEphemeralFilesystem({ AWS_LAMBDA_FUNCTION_NAME: 'bloom' })).toBe(true)
+    expect(hasEphemeralFilesystem({ AWS_LAMBDA_FUNCTION_NAME: 'livinup' })).toBe(true)
     expect(hasEphemeralFilesystem({ LAMBDA_TASK_ROOT: '/var/task' })).toBe(true)
     expect(hasEphemeralFilesystem({ NETLIFY: 'true' })).toBe(true)
   })
@@ -44,22 +44,22 @@ describe('ephemeral filesystem detection', () => {
     expect(hasEphemeralFilesystem({ NODE_ENV: 'production' })).toBe(false)
   })
 
-  it('lets BLOOM_EPHEMERAL_DATA_DIR override detection in both directions', () => {
-    expect(hasEphemeralFilesystem({ BLOOM_EPHEMERAL_DATA_DIR: '1' })).toBe(true)
-    expect(hasEphemeralFilesystem({ VERCEL: '1', BLOOM_EPHEMERAL_DATA_DIR: '0' })).toBe(false)
+  it('lets LIVINUP_EPHEMERAL_DATA_DIR override detection in both directions', () => {
+    expect(hasEphemeralFilesystem({ LIVINUP_EPHEMERAL_DATA_DIR: '1' })).toBe(true)
+    expect(hasEphemeralFilesystem({ VERCEL: '1', LIVINUP_EPHEMERAL_DATA_DIR: '0' })).toBe(false)
   })
 })
 
 describe('PGlite data directory resolution', () => {
-  it('never places a project-local .bloom directory on a serverless runtime', () => {
+  it('never places a project-local .livinup directory on a serverless runtime', () => {
     const { dir, ephemeral } = resolvePgliteDataDir(DEFAULT_DATA_DIR, SERVERLESS)
 
     expect(dir).not.toBeNull()
     expect(ephemeral).toBe(true)
 
-    // The actual defect: `.bloom` under the deployment bundle root.
+    // The actual defect: `.livinup` under the deployment bundle root.
     expect(isInside(process.cwd(), dir!)).toBe(false)
-    expect(dir!.split(path.sep)).not.toContain('.bloom')
+    expect(dir!.split(path.sep)).not.toContain('.livinup')
 
     // And it must be somewhere the runtime will actually let us write.
     expect(isInside(os.tmpdir(), dir!)).toBe(true)
@@ -79,8 +79,8 @@ describe('PGlite data directory resolution', () => {
   })
 
   it('keeps distinct relative directories distinct when redirected to temp', () => {
-    const a = resolvePgliteDataDir('.bloom/test-aaa', SERVERLESS).dir
-    const b = resolvePgliteDataDir('.bloom/test-bbb', SERVERLESS).dir
+    const a = resolvePgliteDataDir('.livinup/test-aaa', SERVERLESS).dir
+    const b = resolvePgliteDataDir('.livinup/test-bbb', SERVERLESS).dir
 
     expect(a).not.toBe(b)
   })

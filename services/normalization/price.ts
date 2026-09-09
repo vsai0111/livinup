@@ -5,13 +5,13 @@ import { round2, round4 } from '@/lib/utils/number'
  *
  * Merchant feeds express money inconsistently: "1,299.00", "$45.99", "45,99",
  * "USD 30", 30, "free". Getting this wrong produces a false discount claim,
- * which is the single most damaging thing Bloom could show a user — so parsing
+ * which is the single most damaging thing LivinUp could show a user — so parsing
  * is strict and refuses anything ambiguous rather than guessing.
  *
  * No language model is ever involved in any function in this file.
  */
 
-/** Highest price Bloom will accept from a feed. Above this, assume bad data. */
+/** Highest price LivinUp will accept from a feed. Above this, assume bad data. */
 export const MAX_ACCEPTED_PRICE = 1_000_000
 
 export type ParsedMoney = { ok: true; amount: number } | { ok: false; reason: string }

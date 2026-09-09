@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- Bloom 0004 — row level security
+-- LivinUp 0004 — row level security
 -- ---------------------------------------------------------------------------
 -- Threat model this addresses:
 --
@@ -9,7 +9,7 @@
 --   directly, bypassing the application entirely. These policies are what make
 --   the anon key safe to publish.
 --
---   Bloom's own server code connects as the table owner (or Supabase's
+--   LivinUp's own server code connects as the table owner (or Supabase's
 --   service_role), which by design is not subject to these policies. Server-side
 --   authorisation is therefore enforced a second time, explicitly, by scoping
 --   every query with `user_id = $currentUser` in lib/db/repositories. Neither
@@ -61,17 +61,17 @@ alter table profiles enable row level security;
 
 drop policy if exists profiles_select_own on profiles;
 create policy profiles_select_own on profiles
-  for select to authenticated using (id = public.bloom_current_user_id());
+  for select to authenticated using (id = public.livinup_current_user_id());
 
 drop policy if exists profiles_update_own on profiles;
 create policy profiles_update_own on profiles
   for update to authenticated
-  using (id = public.bloom_current_user_id())
-  with check (id = public.bloom_current_user_id());
+  using (id = public.livinup_current_user_id())
+  with check (id = public.livinup_current_user_id());
 
 drop policy if exists profiles_insert_own on profiles;
 create policy profiles_insert_own on profiles
-  for insert to authenticated with check (id = public.bloom_current_user_id());
+  for insert to authenticated with check (id = public.livinup_current_user_id());
 
 -- ---------------------------------------------------------------------------
 -- Per-user tables — full ownership of one's own rows, nothing else
@@ -91,8 +91,8 @@ begin
     execute format('drop policy if exists %I on %I', t || '_own', t);
     execute format(
       'create policy %I on %I for all to authenticated
-         using (user_id = public.bloom_current_user_id())
-         with check (user_id = public.bloom_current_user_id())',
+         using (user_id = public.livinup_current_user_id())
+         with check (user_id = public.livinup_current_user_id())',
       t || '_own', t
     );
   end loop;
@@ -107,11 +107,11 @@ alter table user_events enable row level security;
 
 drop policy if exists user_events_insert_own on user_events;
 create policy user_events_insert_own on user_events
-  for insert to authenticated with check (user_id = public.bloom_current_user_id());
+  for insert to authenticated with check (user_id = public.livinup_current_user_id());
 
 drop policy if exists user_events_select_own on user_events;
 create policy user_events_select_own on user_events
-  for select to authenticated using (user_id = public.bloom_current_user_id());
+  for select to authenticated using (user_id = public.livinup_current_user_id());
 
 -- ---------------------------------------------------------------------------
 -- affiliate_clicks — user may create and read their own; never mutate
@@ -120,11 +120,11 @@ alter table affiliate_clicks enable row level security;
 
 drop policy if exists affiliate_clicks_insert_own on affiliate_clicks;
 create policy affiliate_clicks_insert_own on affiliate_clicks
-  for insert to authenticated with check (user_id = public.bloom_current_user_id());
+  for insert to authenticated with check (user_id = public.livinup_current_user_id());
 
 drop policy if exists affiliate_clicks_select_own on affiliate_clicks;
 create policy affiliate_clicks_select_own on affiliate_clicks
-  for select to authenticated using (user_id = public.bloom_current_user_id());
+  for select to authenticated using (user_id = public.livinup_current_user_id());
 
 -- ---------------------------------------------------------------------------
 -- local_auth_users — no policies, ever
@@ -154,4 +154,4 @@ grant select, insert on affiliate_clicks to authenticated;
 -- Explicitly withhold everything on the credential table.
 revoke all on local_auth_users from anon, authenticated;
 
-grant execute on function public.bloom_current_user_id() to anon, authenticated;
+grant execute on function public.livinup_current_user_id() to anon, authenticated;

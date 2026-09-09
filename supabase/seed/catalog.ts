@@ -1,7 +1,7 @@
 /**
  * The seed catalogue.
  *
- * Bloom has no contracted merchant feed yet (see docs/product-data.md), so this
+ * LivinUp has no contracted merchant feed yet (see docs/product-data.md), so this
  * hand-authored catalogue is what the entire product is developed and tested
  * against. It is deliberately realistic — plausible brands, prices, materials
  * and attribute spreads — because a recommendation engine tuned against toy

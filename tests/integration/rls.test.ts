@@ -10,7 +10,7 @@ import { createTestDb, createTestUser, type TestDb } from '../helpers/db'
  * identical to a correct one until someone reads another user's data.
  *
  * Each test assumes the `authenticated` role and sets `app.user_id`, which is
- * exactly what `bloom_current_user_id()` reads. Bloom's own server connects as
+ * exactly what `livinup_current_user_id()` reads. LivinUp's own server connects as
  * a trusted role that bypasses RLS, so these exercise the client-key path.
  */
 describe('row level security', () => {

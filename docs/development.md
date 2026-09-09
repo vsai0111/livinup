@@ -17,7 +17,7 @@ Open http://localhost:3000, create an account, and the product works.
 On first run the app starts an embedded PostgreSQL (PGlite), applies all
 migrations, and seeds the catalogue — 3 merchants, ~46 canonical products, ~104
 listings and ~3,100 price observations, in about four seconds. Data persists in
-`.bloom/pgdata`.
+`.livinup/pgdata`.
 
 `cp .env.example .env.local` only if you want to change defaults; nothing in it
 is required for local development.
@@ -45,7 +45,7 @@ npm run db:reset       # drop and rebuild (refuses on a remote database)
 
 ## Two database modes
 
-Set by `BLOOM_DB_DRIVER` (default `auto`).
+Set by `LIVINUP_DB_DRIVER` (default `auto`).
 
 **Embedded (default, no `DATABASE_URL`).** Real PostgreSQL 18 compiled to WASM,
 running in-process. RLS, generated `tsvector` columns, GIN indexes and exact
@@ -143,13 +143,13 @@ tests/          unit · integration · e2e
 
 ## Troubleshooting
 
-**Stale or broken local data** — `npm run db:reset`, or delete `.bloom/`.
+**Stale or broken local data** — `npm run db:reset`, or delete `.livinup/`.
 
 **"Migration changed after it was applied"** — a migration file was edited after
 being applied. Migrations are immutable; add a new one, or reset locally.
 
 **Signed out after restarting `npm run dev`** — expected. Set
-`BLOOM_AUTH_SECRET` in `.env.local` for a stable key.
+`LIVINUP_AUTH_SECRET` in `.env.local` for a stable key.
 
 **Type errors mentioning `PageProps` / `LayoutProps`** — Next generates route
 types into `.next/types`. Run `npm run build` (or `npm run dev`) to regenerate.

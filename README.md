@@ -1,8 +1,8 @@
-# Bloom
+# LivinUp
 
 Personalised shopping discovery and price intelligence.
 
-Bloom learns what you like, surfaces products that match, and tells you whether
+LivinUp learns what you like, surfaces products that match, and tells you whether
 today's price is genuinely a good moment to buy — using recorded price history
 rather than marketing claims. When it does not have enough data to judge, it
 says so.
@@ -90,19 +90,19 @@ client JavaScript.
 These are enforced in code, not just stated:
 
 - **Never claim what the data does not support.** No "best price" or "lowest
-  price" — Bloom only sees the merchants it has ingested. A deal band is not
+  price" — LivinUp only sees the merchants it has ingested. A deal band is not
   rendered at all when price history is too thin.
 - **Never fabricate history.** Absent statistics render as "—", not as a guess.
 - **Explain every recommendation.** The product page lists which preferences
   matched, which did not, and the full weighted score breakdown.
 - **Everything inferred is visible and deletable.** The preferences page shows
-  every belief Bloom holds, its weight, and where it came from.
+  every belief LivinUp holds, its weight, and where it came from.
 - **A wrong product match is worse than a missing one.** Matching is exact-key
   only.
 
 ## Name
 
-"Bloom" is a working name. Trademark, domain and app-store availability have
+"LivinUp" is a working name. Trademark, domain and app-store availability have
 **not** been verified.
 
 ## Licence

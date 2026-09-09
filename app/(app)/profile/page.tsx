@@ -58,10 +58,10 @@ export default async function ProfilePage() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="text-ink text-sm font-medium">How Bloom uses your data</h2>
+        <h2 className="text-ink text-sm font-medium">How LivinUp uses your data</h2>
         <p className="text-ink-muted mt-2 text-sm leading-relaxed">
-          Bloom records what you view, save, like and dismiss, and uses it to rank products for you.
-          That activity stays in Bloom&apos;s own database. Your preferences are visible and
+          LivinUp records what you view, save, like and dismiss, and uses it to rank products for
+          you. That activity stays in LivinUp&apos;s own database. Your preferences are visible and
           editable — nothing is inferred that you cannot see and remove.
         </p>
         <ButtonLink href="/preferences" variant="secondary" size="sm" className="mt-4">

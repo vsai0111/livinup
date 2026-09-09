@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/cn'
  * The deal score, shown honestly.
  *
  * The rule this component exists to enforce: when `limitedEvidence` is set,
- * Bloom does NOT show a band. A confident "Great deal" derived from two price
+ * LivinUp does NOT show a band. A confident "Great deal" derived from two price
  * observations is exactly the kind of claim the product brief rules out, so the
  * badge degrades to a plain statement that the price is not yet well understood.
  */
