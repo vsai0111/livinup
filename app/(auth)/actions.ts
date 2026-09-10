@@ -10,6 +10,7 @@ import { recordEvent } from '@/lib/analytics/events'
 import { ensureSessionId } from '@/lib/analytics/session'
 import { logger, reportError } from '@/lib/logging/logger'
 import { safeInternalPath } from '@/lib/utils/url'
+import { resolveSiteOrigin } from '@/lib/auth/site-url'
 
 /**
  * Sign-up and sign-in.
@@ -63,7 +64,13 @@ export async function signUpAction(
     const sessionId = await ensureSessionId()
     await recordEvent(db, { eventType: 'signup_started', sessionId })
 
-    const result = await getAuthProvider().signUp(parsed.data)
+    // Absolute, and resolved per-deployment: this URL is baked into the
+    // confirmation email, so it has to name the host the user is actually on
+    // rather than whatever single Site URL the Supabase dashboard holds.
+    const origin = await resolveSiteOrigin()
+    const emailRedirectTo = `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+
+    const result = await getAuthProvider().signUp({ ...parsed.data, emailRedirectTo })
 
     if (!result.ok) {
       return {

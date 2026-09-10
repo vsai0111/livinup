@@ -1,7 +1,5 @@
 import 'server-only'
-import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
-import { publicEnv } from '@/config/env.public'
+import { createSupabaseServerClient } from './supabase-client'
 import { logger } from '@/lib/logging/logger'
 import type { AuthProvider, AuthErrorCode, AuthResult } from './types'
 
@@ -22,25 +20,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   readonly id = 'supabase' as const
 
   private async client() {
-    const cookieStore = await cookies()
-
-    return createServerClient(publicEnv.supabaseUrl, publicEnv.supabasePublishableKey, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            for (const { name, value, options } of cookiesToSet) {
-              cookieStore.set(name, value, options)
-            }
-          } catch {
-            // Called from a Server Component, where cookies are read-only.
-            // Middleware refreshes the session instead; see middleware.ts.
-          }
-        },
-      },
-    })
+    return createSupabaseServerClient()
   }
 
   private mapError(message: string, status?: number): { code: AuthErrorCode; message: string } {
@@ -75,9 +55,25 @@ export class SupabaseAuthProvider implements AuthProvider {
     return { code: 'unavailable', message: 'Sign-in is temporarily unavailable. Please try again.' }
   }
 
-  async signUp({ email, password }: { email: string; password: string }): Promise<AuthResult> {
+  async signUp({
+    email,
+    password,
+    emailRedirectTo,
+  }: {
+    email: string
+    password: string
+    emailRedirectTo?: string
+  }): Promise<AuthResult> {
     const supabase = await this.client()
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    // Without `emailRedirectTo`, Supabase falls back to the Site URL configured
+    // in the dashboard for *every* environment. That default is localhost, so
+    // production confirmation mails shipped a link to the recipient's own
+    // machine and died with ERR_CONNECTION_REFUSED.
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}),
+    })
 
     if (error) {
       logger.warn('supabase signup failed', { code: error.code, status: error.status })

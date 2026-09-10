@@ -37,6 +37,35 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
+describe('where the confirmation email points', () => {
+  it('sends Supabase the callback URL it was given', async () => {
+    auth.signUp.mockResolvedValue({ data: { user: USER, session: null }, error: null })
+
+    await new SupabaseAuthProvider().signUp({
+      ...CREDENTIALS,
+      emailRedirectTo: 'https://livinup-delta.vercel.app/auth/callback?next=%2Fonboarding',
+    })
+
+    expect(auth.signUp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: {
+          emailRedirectTo: 'https://livinup-delta.vercel.app/auth/callback?next=%2Fonboarding',
+        },
+      }),
+    )
+  })
+
+  it('omits the option entirely when no URL was resolved', async () => {
+    // Passing `emailRedirectTo: undefined` would override nothing but is easy
+    // to get wrong; the dashboard Site URL must remain the fallback.
+    auth.signUp.mockResolvedValue({ data: { user: USER, session: null }, error: null })
+
+    await new SupabaseAuthProvider().signUp(CREDENTIALS)
+
+    expect(auth.signUp.mock.calls[0][0]).not.toHaveProperty('options')
+  })
+})
+
 describe('signing up when email confirmation is required', () => {
   it('reports the account as created but awaiting confirmation', async () => {
     // Supabase's shape for "verification email sent": a user, and no session.

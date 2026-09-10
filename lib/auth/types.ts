@@ -39,8 +39,17 @@ export type AuthErrorCode =
 export interface AuthProvider {
   readonly id: 'supabase' | 'local'
 
-  /** Create an account and start a session. */
-  signUp(input: { email: string; password: string }): Promise<AuthResult>
+  /**
+   * Create an account and start a session.
+   *
+   * `emailRedirectTo` is the absolute URL the provider's confirmation mail
+   * should point at. Providers that do not send mail ignore it.
+   */
+  signUp(input: {
+    email: string
+    password: string
+    emailRedirectTo?: string
+  }): Promise<AuthResult>
 
   /** Verify credentials and start a session. */
   signIn(input: { email: string; password: string }): Promise<AuthResult>
