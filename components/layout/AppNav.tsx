@@ -8,10 +8,14 @@ import { cn } from '@/lib/utils/cn'
 /**
  * Primary navigation.
  *
- * One component renders both the desktop sidebar-style top nav and the mobile
- * bottom bar, so the destinations can never drift apart between breakpoints.
- * The current page is marked with `aria-current="page"` rather than colour
- * alone.
+ * One component renders both the desktop top nav and the mobile bottom bar, so
+ * the destinations can never drift apart between breakpoints. The current page
+ * is marked with `aria-current="page"` rather than colour alone.
+ *
+ * Icons appear only on the mobile bar, where they carry real weight in a 5-up
+ * row of tiny labels. On desktop the labels have room to speak for themselves,
+ * and a row of icons beside them is decoration that makes the header noisier
+ * without making it clearer.
  */
 
 const ICONS: Record<string, React.ReactNode> = {
@@ -61,12 +65,25 @@ function useIsActive() {
   return (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 }
 
+/**
+ * Onboarding is a single task with its own exits ("skip this question", "skip
+ * setup entirely"). Five competing destinations beside it is the distraction
+ * the flow is designed to avoid, so the nav stands down until it is finished.
+ */
+function useHideNav() {
+  const pathname = usePathname()
+  return pathname === '/onboarding' || pathname.startsWith('/onboarding/')
+}
+
 export function AppNavDesktop() {
   const isActive = useIsActive()
+  const hidden = useHideNav()
+
+  if (hidden) return null
 
   return (
     <nav aria-label="Main" className="hidden md:block">
-      <ul className="flex items-center gap-1">
+      <ul className="flex items-center gap-0.5">
         {PRIMARY_NAV.map((item) => {
           const active = isActive(item.href)
           return (
@@ -75,13 +92,12 @@ export function AppNavDesktop() {
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'inline-flex items-center gap-2 rounded-[var(--radius-control)] px-3 py-2 text-sm font-medium transition-colors',
+                  'inline-flex h-9 items-center rounded-[var(--radius-control)] px-3 text-sm transition-colors',
                   active
-                    ? 'bg-accent-soft text-accent-strong'
-                    : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
+                    ? 'bg-surface-sunken text-ink font-semibold'
+                    : 'text-ink-muted hover:bg-surface-sunken hover:text-ink font-medium',
                 )}
               >
-                <NavIcon name={item.icon} />
                 {item.label}
               </Link>
             </li>
@@ -94,6 +110,9 @@ export function AppNavDesktop() {
 
 export function AppNavMobile() {
   const isActive = useIsActive()
+  const hidden = useHideNav()
+
+  if (hidden) return null
 
   return (
     <nav
@@ -109,10 +128,18 @@ export function AppNavMobile() {
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-medium',
-                  active ? 'text-accent-strong' : 'text-ink-subtle',
+                  'relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] transition-colors',
+                  active ? 'text-ink font-semibold' : 'text-ink-subtle font-medium',
                 )}
               >
+                {/* A bar rather than colour alone, so the current tab is still
+                    obvious to someone who cannot separate the two greys. */}
+                {active && (
+                  <span
+                    aria-hidden="true"
+                    className="bg-ink absolute inset-x-4 top-0 h-0.5 rounded-full"
+                  />
+                )}
                 <NavIcon name={item.icon} />
                 {item.label}
               </Link>

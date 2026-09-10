@@ -54,24 +54,29 @@ export function SearchFilters({
   }
 
   return (
-    <details
-      className="group border-line bg-surface lg:open rounded-[var(--radius-card)] border"
-      open
-    >
-      <summary className="text-ink cursor-pointer list-none p-4 text-sm font-semibold lg:cursor-default">
+    /*
+      Closed by default, and forced open from lg upwards by the
+      `filters-disclosure` rule in globals.css. `open` as an attribute is
+      all-or-nothing across breakpoints, and leaving it set meant a phone
+      opened to a full screen of filters with the products pushed below the
+      fold — the thing the disclosure exists to prevent.
+    */
+    <details className="filters-disclosure group border-line bg-surface rounded-[var(--radius-card)] border">
+      <summary className="text-ink cursor-pointer list-none p-4 text-sm font-semibold">
         <span className="flex items-center justify-between">
           Filters
-          <span className="text-ink-subtle text-xs font-normal lg:hidden" aria-hidden="true">
-            tap to toggle
+          <span className="text-ink-subtle text-xs font-normal" aria-hidden="true">
+            <span className="group-open:hidden">Show</span>
+            <span className="hidden group-open:inline">Hide</span>
           </span>
         </span>
       </summary>
 
-      <div className="border-line space-y-6 border-t p-4">
+      <div className="border-line space-y-6 border-t p-4 pt-5">
         {hasFilters && (
           <Link
             href={buildSearchHref({ text: query.text, sort: query.sort })}
-            className="text-accent-strong inline-block text-xs font-medium underline underline-offset-2"
+            className="text-ink inline-block text-xs font-medium underline underline-offset-2"
           >
             Clear all filters
           </Link>
@@ -234,12 +239,14 @@ function FacetLink({
         className={cn(
           'flex items-center justify-between gap-2 rounded px-2 py-1.5 text-sm',
           active
-            ? 'bg-accent-soft text-accent-strong font-medium'
-            : 'text-ink-muted hover:bg-surface-sunken',
+            ? 'bg-ink text-primary-ink font-medium'
+            : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
         )}
       >
         <span className="truncate">{label}</span>
-        <span className="text-ink-subtle shrink-0 text-xs">{count}</span>
+        <span className={cn('shrink-0 text-xs', active ? 'opacity-70' : 'text-ink-subtle')}>
+          {count}
+        </span>
       </Link>
     </li>
   )

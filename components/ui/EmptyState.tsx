@@ -16,10 +16,14 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="border-line-strong flex flex-col items-center justify-center rounded-[var(--radius-card)] border border-dashed px-6 py-14 text-center">
+    <div className="border-line bg-surface-sunken/60 flex flex-col items-center justify-center rounded-[var(--radius-card)] border border-dashed px-6 py-16 text-center">
       <h2 className="text-ink text-base font-semibold">{title}</h2>
-      {description && <p className="text-ink-muted mt-1.5 max-w-md text-sm">{description}</p>}
-      {action && <div className="mt-5">{action}</div>}
+      {description && (
+        <p className="text-ink-muted mt-2 max-w-md text-sm leading-relaxed text-pretty">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-6">{action}</div>}
     </div>
   )
 }

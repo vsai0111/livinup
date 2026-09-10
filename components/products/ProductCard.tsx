@@ -16,6 +16,10 @@ import { ProductImage } from './ProductImage'
  * makes both keyboard and screen-reader interaction ambiguous. A stretched
  * pseudo-element gives the card a large click target while keeping exactly one
  * focusable link per card.
+ *
+ * Titles and match reasons are clamped to a fixed number of lines so that a
+ * row of cards keeps a common baseline. Ragged card heights are the single
+ * thing that makes a product grid look unfinished.
  */
 export function ProductCard({
   item,
@@ -31,7 +35,10 @@ export function ProductCard({
   const outOfStock = offer.availability === 'out_of_stock' || offer.availability === 'discontinued'
 
   return (
-    <Card as="article" className="group relative flex w-full flex-col overflow-hidden">
+    <Card
+      as="article"
+      className="group hover:border-line-strong relative flex w-full flex-col overflow-hidden transition-[border-color,box-shadow] duration-150 hover:shadow-[var(--shadow-raised)]"
+    >
       <div className="bg-surface-sunken relative aspect-4/5 overflow-hidden">
         <ProductImage
           src={item.imageUrl}
@@ -40,8 +47,8 @@ export function ProductCard({
         />
 
         {outOfStock && (
-          <div className="bg-surface/70 absolute inset-0 flex items-center justify-center">
-            <span className="bg-surface text-ink-muted rounded-full px-3 py-1 text-xs font-medium">
+          <div className="bg-surface/75 absolute inset-0 flex items-center justify-center">
+            <span className="border-line bg-surface text-ink-muted rounded-full border px-3 py-1 text-xs font-medium">
               Out of stock
             </span>
           </div>
@@ -49,14 +56,13 @@ export function ProductCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-3.5">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-ink-subtle text-xs font-medium tracking-wide uppercase">
-            {product.brand}
-          </p>
-          <DealBadge deal={deal} />
-        </div>
+        <p className="text-ink-subtle text-[11px] font-medium tracking-wide uppercase">
+          {product.brand}
+        </p>
 
-        <h3 className="text-ink text-sm leading-snug font-medium">
+        {/* Two lines are reserved whether or not the title needs them, so the
+            price sits on the same baseline in every card across a row. */}
+        <h3 className="text-ink line-clamp-2 min-h-[2.5rem] text-sm leading-snug font-medium">
           {/*
             Prefetch is off deliberately. Every card in the feed is a link, and
             the default viewport prefetch turned one scroll into a burst of
@@ -81,8 +87,12 @@ export function ProductCard({
           currency={offer.currency}
         />
 
+        <div>
+          <DealBadge deal={deal} />
+        </div>
+
         {explanations.length > 0 && (
-          <p className="text-ink-muted text-xs leading-relaxed">{explanations[0]}</p>
+          <p className="text-ink-muted line-clamp-2 text-xs leading-relaxed">{explanations[0]}</p>
         )}
 
         <p className="text-ink-subtle mt-auto pt-1 text-xs">
@@ -93,7 +103,7 @@ export function ProductCard({
 
       {state && (
         // z-10 lifts the controls above the card-wide stretched link overlay.
-        <div className="border-line relative z-10 border-t px-3.5 py-2">
+        <div className="border-line bg-surface-sunken/50 relative z-10 border-t px-3.5 py-2">
           <ProductActions
             productId={product.id}
             productTitle={`${product.brand} ${product.canonicalTitle}`}

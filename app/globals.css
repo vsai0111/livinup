@@ -5,90 +5,79 @@
  *
  * Tailwind v4 reads @theme and generates the corresponding utilities, so these
  * names are the whole vocabulary the UI is allowed to use — components never
- * hard-code a hex value. Light and dark are both first-class: every surface and
- * text token is redefined under the dark scheme rather than relying on opacity
- * tricks, which is what keeps contrast ratios honest in both.
+ * hard-code a hex value.
+ *
+ * The system is white-first and single-theme. Two colour roles do the work, and
+ * keeping them separate is what stops the interface from looking busy:
+ *
+ *   primary — actions. Near-black. Buttons, the things you click.
+ *   accent  — signal. Green. "this matched you", "this price is good".
+ *
+ * A green primary button would put the action colour and the meaning colour in
+ * competition, and every screen would read as if something were being sold. Ink
+ * for verbs, green for facts.
  */
 
 @theme {
-  /* Warm neutrals: paper rather than clinical white. */
-  --color-canvas: #fbfaf8;
+  /* Surfaces. White page, one soft grey for recessed areas. */
+  --color-canvas: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-sunken: #f4f2ee;
+  --color-surface-sunken: #f6f7f9;
   --color-surface-raised: #ffffff;
 
-  --color-ink: #1a1917;
-  --color-ink-muted: #5c5852;
-  --color-ink-subtle: #857f76;
+  /* Text. Near-black rather than pure black: #000 on #fff is harsh at length. */
+  --color-ink: #0d1117;
+  --color-ink-muted: #566072;
+  --color-ink-subtle: #838d9e;
 
-  --color-line: #e6e2da;
-  --color-line-strong: #d3cec3;
+  /* Borders. Deliberately faint — structure comes from spacing, not lines. */
+  --color-line: #e9ebef;
+  --color-line-strong: #d8dce2;
 
-  /* Accent: moss. Calm, not a "BUY NOW" red. */
-  --color-accent: #3f6b4f;
-  --color-accent-strong: #2f5340;
-  --color-accent-soft: #eef3ee;
+  /* Actions. */
+  --color-primary: #14181f;
+  --color-primary-strong: #000000;
+  --color-primary-ink: #ffffff;
+
+  /* Signal. Used sparingly: active nav, matches, positive price movement. */
+  --color-accent: #2f6b4a;
+  --color-accent-strong: #24543a;
+  --color-accent-soft: #eef4f0;
   --color-accent-ink: #ffffff;
 
-  /* Deal bands. Deliberately restrained — the score is information, not a shout. */
-  --color-deal-excellent: #1f6b45;
-  --color-deal-great: #2e7d5b;
-  --color-deal-good: #5f7342;
-  --color-deal-fair: #7d6e3e;
-  --color-deal-poor: #7d5f52;
+  /* Deal bands. Information, not a shout. */
+  --color-deal-excellent: #1c6b45;
+  --color-deal-great: #2b7a58;
+  --color-deal-good: #5a7040;
+  --color-deal-fair: #7a6a3c;
+  --color-deal-poor: #7a5c50;
 
-  --color-positive: #1f6b45;
-  --color-negative: #a2453a;
-  --color-warning: #7d6423;
+  --color-positive: #1c6b45;
+  --color-negative: #a03f34;
+  --color-warning: #7a6122;
 
-  --radius-card: 0.875rem;
-  --radius-control: 0.625rem;
+  /* Radii. Rounded, not pill-shaped — softness without novelty. */
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+
+  /*
+   * Elevation. Two steps only. Anything that needs a third shadow to be
+   * legible needs better spacing instead.
+   */
+  --shadow-subtle: 0 1px 2px 0 rgb(13 17 23 / 0.04);
+  --shadow-raised: 0 1px 2px 0 rgb(13 17 23 / 0.04), 0 8px 24px -12px rgb(13 17 23 / 0.12);
 
   --font-sans:
     var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', monospace;
 }
 
-/*
- * Dark palette.
- *
- * These override the custom properties directly rather than nesting a second
- * `@theme` block. Tailwind v4 only honours `@theme` at the top level — nested
- * inside a media query it is hoisted and emitted unconditionally, so the dark
- * values won everywhere and light mode never rendered at all.
- *
- * Overriding `--color-*` on `:root` works because every generated utility
- * resolves through `var(--color-*)` at use time.
- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-canvas: #14151a;
-    --color-surface: #1b1d23;
-    --color-surface-sunken: #101116;
-    --color-surface-raised: #23262d;
-    --color-ink: #f0eee9;
-    --color-ink-muted: #aeaaa2;
-    --color-ink-subtle: #8b8780;
-    --color-line: #2c2f36;
-    --color-line-strong: #3b3f47;
-    --color-accent: #7fb08c;
-    --color-accent-strong: #9ac4a5;
-    --color-accent-soft: #1e2a22;
-    --color-accent-ink: #10221a;
-    --color-deal-excellent: #6cc191;
-    --color-deal-great: #67b58c;
-    --color-deal-good: #a3ba7c;
-    --color-deal-fair: #c0aa6d;
-    --color-deal-poor: #bb8f81;
-    --color-positive: #6cc191;
-    --color-negative: #e08a7d;
-    --color-warning: #d0b169;
-  }
-}
-
 @layer base {
   html {
-    color-scheme: light dark;
+    /* Single theme. The palette above has no dark counterpart, so advertising
+       one would hand form controls and scrollbars a scheme the page does not
+       actually implement. */
+    color-scheme: light;
   }
 
   body {
@@ -96,6 +85,17 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+   * Headings track tighter as they grow. Default letter-spacing is tuned for
+   * body copy and looks loose and amateurish at display sizes.
+   */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.018em;
   }
 
   /*
@@ -105,7 +105,7 @@
    * ring stays for the people who navigate without a pointer.
    */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -119,6 +119,43 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+
+  /* In-page anchors on the landing page must clear the sticky navbar. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+}
+
+@layer components {
+  /*
+   * Search filters: a disclosure on small screens, permanently open from lg.
+   *
+   * `<details open>` cannot vary by breakpoint — the attribute is either there
+   * or it is not — so the element ships closed (the right default on a phone)
+   * and desktop forces it open in CSS.
+   *
+   * Both rules are needed for that. Browsers used to hide the children of a
+   * closed <details> with `display: none`, which the second rule overrides;
+   * current ones hide the `::details-content` pseudo-element with
+   * `content-visibility` instead, which only the first rule reaches. Ship both
+   * and the panel is open on desktop either way.
+   */
+  @media (min-width: 64rem) {
+    .filters-disclosure > summary {
+      display: none;
+    }
+
+    .filters-disclosure::details-content {
+      content-visibility: visible;
+      block-size: auto;
+    }
+
+    .filters-disclosure > :not(summary) {
+      display: block;
+      /* The panel's top border belongs to the summary that is now hidden. */
+      border-top-width: 0;
     }
   }
 }

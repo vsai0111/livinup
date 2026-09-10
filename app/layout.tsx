@@ -18,10 +18,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Not capping maximumScale: preventing pinch-zoom breaks the page for anyone
   // who needs to magnify it.
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fbfaf8' },
-    { media: '(prefers-color-scheme: dark)', color: '#14151a' },
-  ],
+  // One theme, so one colour. Offering a dark themeColor the stylesheet does
+  // not implement gives mobile browsers a chrome that clashes with the page.
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
@@ -30,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <a
           href="#main"
-          className="sr-only-focusable bg-accent text-accent-ink absolute top-4 left-4 z-50 rounded px-4 py-2"
+          className="sr-only-focusable bg-primary text-primary-ink absolute top-4 left-4 z-50 rounded-[var(--radius-control)] px-4 py-2 text-sm font-medium"
         >
           Skip to main content
         </a>

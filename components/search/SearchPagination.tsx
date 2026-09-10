@@ -49,7 +49,7 @@ export function SearchPagination({
           className={cn(
             linkClass,
             candidate === page
-              ? 'border-accent bg-accent-soft text-accent-strong font-medium'
+              ? 'border-ink bg-ink text-primary-ink font-medium'
               : 'border-line-strong text-ink hover:bg-surface-sunken',
           )}
         >

@@ -13,7 +13,7 @@ export function SearchBar({ defaultValue, query }: { defaultValue: string; query
   const filters = query.filters ?? {}
 
   return (
-    <form action="/search" method="get" role="search" className="flex flex-wrap items-end gap-3">
+    <form action="/search" method="get" role="search" className="flex flex-wrap items-end gap-2.5">
       {/* Preserve active filters across a new search. */}
       {filters.category && <input type="hidden" name="category" value={filters.category} />}
       {filters.brands?.length ? (
@@ -29,7 +29,9 @@ export function SearchBar({ defaultValue, query }: { defaultValue: string; query
         <input type="hidden" name="max" value={filters.maxPrice} />
       )}
 
-      <div className="min-w-0 flex-1">
+      {/* Full width on a phone, where sharing a row with the sort control and
+          the button left roughly 90px to type into. */}
+      <div className="w-full min-w-0 sm:flex-1">
         <label htmlFor="search-input" className="sr-only">
           Search products
         </label>
@@ -40,11 +42,11 @@ export function SearchBar({ defaultValue, query }: { defaultValue: string; query
           defaultValue={defaultValue}
           placeholder="Search by product, brand or material"
           autoComplete="off"
-          className="border-line-strong bg-surface text-ink placeholder:text-ink-subtle h-11 w-full rounded-[var(--radius-control)] border px-4"
+          className="border-line-strong bg-surface text-ink placeholder:text-ink-subtle hover:border-ink-subtle h-11 w-full rounded-[var(--radius-control)] border px-4 text-sm transition-colors"
         />
       </div>
 
-      <div className="w-44">
+      <div className="min-w-0 flex-1 sm:w-44 sm:flex-none">
         <SelectField
           label="Sort by"
           labelHidden
@@ -61,7 +63,9 @@ export function SearchBar({ defaultValue, query }: { defaultValue: string; query
         </SelectField>
       </div>
 
-      <Button type="submit">Search</Button>
+      <Button type="submit" className="shrink-0">
+        Search
+      </Button>
     </form>
   )
 }

@@ -16,11 +16,18 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const BASE =
-  'inline-flex items-center justify-center gap-2 font-medium transition-colors ' +
+  'inline-flex items-center justify-center gap-2 font-medium whitespace-nowrap ' +
+  'transition-[background-color,border-color,color] duration-150 ' +
   'disabled:cursor-not-allowed disabled:opacity-50 rounded-[var(--radius-control)]'
 
+/*
+ * `primary` is ink, not the brand green. Green is reserved for statements about
+ * the data — a matched preference, a price that has fallen — and a green button
+ * next to a green "Great deal" badge makes the interface look like it is
+ * selling rather than reporting.
+ */
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-accent-ink hover:bg-accent-strong',
+  primary: 'bg-primary text-primary-ink hover:bg-primary-strong shadow-[var(--shadow-subtle)]',
   secondary: 'bg-surface text-ink border border-line-strong hover:bg-surface-sunken',
   ghost: 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
   danger: 'bg-surface text-negative border border-line-strong hover:bg-surface-sunken',
@@ -28,9 +35,9 @@ const VARIANTS: Record<ButtonVariant, string> = {
 
 const SIZES: Record<ButtonSize, string> = {
   // Minimum 44px touch targets on the md/lg sizes, per WCAG target-size guidance.
-  sm: 'h-9 px-3 text-sm',
+  sm: 'h-9 px-3.5 text-sm',
   md: 'h-11 px-4 text-sm',
-  lg: 'h-12 px-6 text-base',
+  lg: 'h-12 px-6 text-[0.9375rem]',
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

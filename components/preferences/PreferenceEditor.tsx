@@ -51,7 +51,9 @@ export function PreferenceEditor({
   return (
     <section className="border-line bg-surface rounded-[var(--radius-card)] border p-5">
       <h2 className="text-ink text-sm font-semibold">{label}</h2>
-      {description && <p className="text-ink-muted mt-1 text-xs">{description}</p>}
+      {description && (
+        <p className="text-ink-muted mt-1.5 text-xs leading-relaxed">{description}</p>
+      )}
 
       <ul className="mt-4 flex flex-wrap gap-2">
         {options.map((value) => {
@@ -66,7 +68,7 @@ export function PreferenceEditor({
                 disabled={pending}
                 aria-pressed={active}
                 className={cn(
-                  'rounded-full border px-3.5 py-1.5 text-sm transition-colors disabled:opacity-60',
+                  'rounded-full border px-3.5 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60',
                   active
                     ? 'border-accent bg-accent-soft text-accent-strong'
                     : 'border-line-strong bg-surface text-ink-muted hover:bg-surface-sunken hover:text-ink',

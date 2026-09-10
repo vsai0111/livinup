@@ -5,6 +5,7 @@ import { countPreferences } from '@/lib/preferences/repository'
 import { signOutAction } from '@/app/(auth)/actions'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { formatDate } from '@/lib/utils/format'
 import { num } from '@/lib/db/rows'
 
@@ -35,41 +36,37 @@ export default async function ProfilePage() {
   ]
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 py-2">
-      <header>
-        <h1 className="text-ink text-2xl font-semibold tracking-tight">
-          {session.profile.displayName}
-        </h1>
-        <p className="text-ink-muted mt-1 text-sm">
-          Member since {formatDate(session.profile.createdAt)}
-        </p>
-      </header>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        title={session.profile.displayName}
+        description={`Member since ${formatDate(session.profile.createdAt)}`}
+      />
 
-      <Card className="p-5">
-        <h2 className="text-ink text-sm font-medium">Your activity</h2>
-        <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <Card className="p-5 sm:p-6">
+        <h2 className="text-ink text-sm font-semibold">Your activity</h2>
+        <dl className="mt-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label}>
               <dt className="text-ink-subtle text-xs">{stat.label}</dt>
-              <dd className="text-ink text-xl font-semibold">{stat.value}</dd>
+              <dd className="text-ink mt-1 text-2xl font-semibold tabular-nums">{stat.value}</dd>
             </div>
           ))}
         </dl>
       </Card>
 
-      <Card className="p-5">
-        <h2 className="text-ink text-sm font-medium">How LivinUp uses your data</h2>
-        <p className="text-ink-muted mt-2 text-sm leading-relaxed">
+      <Card className="p-5 sm:p-6">
+        <h2 className="text-ink text-sm font-semibold">How LivinUp uses your data</h2>
+        <p className="text-ink-muted mt-2.5 text-sm leading-relaxed">
           LivinUp records what you view, save, like and dismiss, and uses it to rank products for
           you. That activity stays in LivinUp&apos;s own database. Your preferences are visible and
           editable — nothing is inferred that you cannot see and remove.
         </p>
-        <ButtonLink href="/preferences" variant="secondary" size="sm" className="mt-4">
+        <ButtonLink href="/preferences" variant="secondary" size="sm" className="mt-5">
           Review your preferences
         </ButtonLink>
       </Card>
 
-      <form action={signOutAction}>
+      <form action={signOutAction} className="border-line border-t pt-6">
         <Button type="submit" variant="secondary">
           Sign out
         </Button>

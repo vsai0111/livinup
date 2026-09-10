@@ -54,7 +54,7 @@ export function ProductActions({
       'disabled:opacity-50',
       active
         ? 'border-accent bg-accent-soft text-accent-strong'
-        : 'border-line-strong bg-surface text-ink-muted hover:text-ink',
+        : 'border-line-strong bg-surface text-ink-muted hover:bg-surface-sunken hover:text-ink',
     )
 
   return (

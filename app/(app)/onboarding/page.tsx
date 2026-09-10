@@ -59,10 +59,25 @@ const STEP_DEFINITIONS: Record<OnboardingStep, StepDefinition> = {
   },
 }
 
+/** Short labels for the step rail, so progress reads as content rather than a number. */
+const STEP_LABELS: Record<OnboardingStep, string> = {
+  categories: 'Categories',
+  colors: 'Colours',
+  style: 'Style',
+  budget: 'Budget',
+}
+
 function isStep(value: unknown): value is OnboardingStep {
   return typeof value === 'string' && (ONBOARDING_STEPS as readonly string[]).includes(value)
 }
 
+/**
+ * Onboarding.
+ *
+ * One question per screen, each a plain form POST — so the flow survives a
+ * refresh, a back button and a browser with JavaScript switched off, which a
+ * multi-step client wizard holding its answers in memory does not.
+ */
 export default async function OnboardingPage({ searchParams }: PageProps<'/onboarding'>) {
   const session = await requireUser('/onboarding')
   const params = await searchParams
@@ -72,6 +87,7 @@ export default async function OnboardingPage({ searchParams }: PageProps<'/onboa
   const definition = STEP_DEFINITIONS[step]
   const following = ONBOARDING_STEPS[index + 1]
   const nextHref = following ? `/onboarding?step=${following}` : '/onboarding/complete'
+  const isLast = index === ONBOARDING_STEPS.length - 1
 
   // Someone who has already finished has no reason to be here.
   if (session.profile.onboardingCompleted && !params.step) redirect('/home')
@@ -82,65 +98,121 @@ export default async function OnboardingPage({ searchParams }: PageProps<'/onboa
   }
 
   return (
-    <div className="mx-auto max-w-2xl py-4">
-      <p className="text-ink-subtle text-sm">
-        Step {index + 1} of {ONBOARDING_STEPS.length}
-      </p>
+    <div className="mx-auto max-w-2xl">
+      {/* --- Progress --- */}
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-ink-subtle text-xs font-medium tracking-wide uppercase">
+          Step {index + 1} of {ONBOARDING_STEPS.length}
+        </p>
+        <p className="text-ink-subtle text-xs">{STEP_LABELS[step]}</p>
+      </div>
 
-      {/* Native progress element: exposes value and max to assistive tech for free. */}
-      <progress
-        className="[&::-webkit-progress-bar]:bg-surface-sunken [&::-webkit-progress-value]:bg-accent [&::-moz-progress-bar]:bg-accent mt-2 h-1 w-full overflow-hidden rounded-full"
-        value={index + 1}
-        max={ONBOARDING_STEPS.length}
-      >
+      {/*
+        Native progress element: exposes value and max to assistive tech for
+        free, and degrades to a sensible control if the custom styling is not
+        applied. The segments below are decorative reinforcement, not the
+        accessible source of truth.
+      */}
+      <progress className="sr-only" value={index + 1} max={ONBOARDING_STEPS.length}>
         {index + 1} of {ONBOARDING_STEPS.length}
       </progress>
 
-      <h1 className="text-ink mt-6 text-2xl font-semibold tracking-tight">{definition.title}</h1>
-      <p className="text-ink-muted mt-2 text-sm">{definition.subtitle}</p>
+      <ol aria-hidden="true" className="mt-2 flex gap-1.5">
+        {ONBOARDING_STEPS.map((name, position) => (
+          <li
+            key={name}
+            className={`h-1 flex-1 rounded-full ${position <= index ? 'bg-ink' : 'bg-line'}`}
+          />
+        ))}
+      </ol>
 
-      <form action={saveOnboardingStepAction} className="mt-7">
+      {/* --- Question --- */}
+      <h1 className="text-ink mt-8 text-2xl font-semibold text-balance sm:text-3xl">
+        {definition.title}
+      </h1>
+      <p className="text-ink-muted mt-2.5 text-base leading-relaxed">{definition.subtitle}</p>
+
+      <form action={saveOnboardingStepAction} className="mt-8">
         <input type="hidden" name="step" value={step} />
 
         <fieldset>
           <legend className="sr-only">{definition.title}</legend>
-          <div className="flex flex-wrap gap-2">
+
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {definition.options.map((option) => (
               <label
                 key={option.value}
-                className="border-line-strong bg-surface text-ink hover:bg-surface-sunken has-checked:border-accent has-checked:bg-accent-soft has-checked:text-accent-strong has-focus-visible:outline-accent cursor-pointer rounded-full border px-4 py-2 text-sm transition-colors has-focus-visible:outline has-focus-visible:outline-2"
+                className={
+                  'group border-line-strong bg-surface text-ink relative flex cursor-pointer ' +
+                  'items-center justify-between gap-2 rounded-[var(--radius-control)] border ' +
+                  'px-3.5 py-3 text-sm font-medium transition-colors ' +
+                  'hover:border-ink-subtle hover:bg-surface-sunken ' +
+                  // Green for selection, matching the Preferences page and the
+                  // match chips on a product: across the product, green means
+                  // "this is about you", ink means "this is a control".
+                  'has-checked:border-accent has-checked:bg-accent-soft has-checked:text-accent-strong ' +
+                  'has-focus-visible:outline-primary has-focus-visible:outline has-focus-visible:outline-2 ' +
+                  'has-focus-visible:outline-offset-2'
+                }
               >
                 <input type="checkbox" name="value" value={option.value} className="sr-only" />
-                {option.label}
+                <span>{option.label}</span>
+                {/*
+                  Selection is carried by the border and the tick together. The
+                  tick matters: a border-weight change alone is invisible to
+                  plenty of people, and the checkbox itself is off-screen.
+                */}
+                <CheckIndicator />
               </label>
             ))}
           </div>
         </fieldset>
 
-        <div className="mt-8 flex items-center gap-3">
+        <div className="border-line mt-8 flex flex-wrap items-center gap-3 border-t pt-6">
           <Button type="submit" size="lg">
-            {index === ONBOARDING_STEPS.length - 1 ? 'Finish' : 'Continue'}
+            {isLast ? 'Finish setup' : 'Continue'}
           </Button>
 
           {/* A link, not a submit button: a submit would save whatever boxes
               happened to be ticked, which is the opposite of skipping. */}
           <Link
             href={nextHref}
-            className="text-ink-muted hover:text-ink inline-flex h-12 items-center px-4 text-sm font-medium underline underline-offset-2"
+            className="text-ink-muted hover:text-ink inline-flex h-12 items-center px-2 text-sm font-medium"
           >
-            Skip this
+            Skip this question
           </Link>
         </div>
       </form>
 
-      <form action={skipOnboardingAction} className="border-line mt-6 border-t pt-5">
+      <form action={skipOnboardingAction} className="mt-8">
         <button
           type="submit"
-          className="text-ink-subtle hover:text-ink text-sm underline underline-offset-2"
+          className="text-ink-subtle hover:text-ink text-xs underline underline-offset-2"
         >
-          Skip the whole setup and go to my feed
+          Skip setup entirely and go straight to my feed
         </button>
       </form>
     </div>
+  )
+}
+
+function CheckIndicator() {
+  return (
+    <span
+      aria-hidden="true"
+      className="border-line-strong text-accent-ink group-has-checked:border-accent group-has-checked:bg-accent flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border transition-colors"
+    >
+      <svg
+        viewBox="0 0 12 12"
+        className="h-2.5 w-2.5 opacity-0 group-has-checked:opacity-100"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m2 6.2 2.6 2.6L10 3.4" />
+      </svg>
+    </span>
   )
 }

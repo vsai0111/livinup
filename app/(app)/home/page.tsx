@@ -7,6 +7,7 @@ import { countPreferences } from '@/lib/preferences/repository'
 import { buildHomeFeed } from '@/lib/recommendations/service'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { ProductGrid } from '@/components/products/ProductGrid'
 
 export const metadata = { title: 'Home' }
@@ -51,14 +52,24 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <h1 className="text-ink text-2xl font-semibold tracking-tight">Hello, {firstName}</h1>
-        <p className="text-ink-muted mt-1 text-sm">
-          {preferenceCount === 0
+      <PageHeader
+        title={`Hello, ${firstName}`}
+        description={
+          preferenceCount === 0
             ? 'Save or like anything you find appealing and this feed will start to fit you.'
-            : `Ranked against ${preferenceCount} preference${preferenceCount === 1 ? '' : 's'}. Adjust them any time.`}
-        </p>
-      </header>
+            : `Ranked against ${preferenceCount} preference${preferenceCount === 1 ? '' : 's'}. Adjust them any time.`
+        }
+        actions={
+          <>
+            <ButtonLink href="/search" variant="secondary" size="sm">
+              Search
+            </ButtonLink>
+            <ButtonLink href="/preferences" variant="secondary" size="sm">
+              Preferences
+            </ButtonLink>
+          </>
+        }
+      />
 
       {sections.length === 0 ? (
         <EmptyState
@@ -74,25 +85,22 @@ export default async function HomePage() {
           }
         />
       ) : (
-        sections.map((section) => (
-          <section key={section.id} aria-labelledby={`section-${section.id}`}>
-            <div className="mb-4 flex items-baseline justify-between gap-4">
-              <div>
-                <h2
-                  id={`section-${section.id}`}
-                  className="text-ink text-lg font-semibold tracking-tight"
-                >
+        <div className="space-y-12">
+          {sections.map((section) => (
+            <section key={section.id} aria-labelledby={`section-${section.id}`}>
+              <div className="border-line mb-5 border-b pb-4">
+                <h2 id={`section-${section.id}`} className="text-ink text-lg font-semibold">
                   {section.title}
                 </h2>
                 {section.subtitle && (
-                  <p className="text-ink-muted mt-0.5 text-sm">{section.subtitle}</p>
+                  <p className="text-ink-muted mt-1 text-sm leading-relaxed">{section.subtitle}</p>
                 )}
               </div>
-            </div>
 
-            <ProductGrid items={section.items} states={states} label={section.title} />
-          </section>
-        ))
+              <ProductGrid items={section.items} states={states} label={section.title} />
+            </section>
+          ))}
+        </div>
       )}
     </div>
   )

@@ -79,7 +79,7 @@ export function LearnedPreferences({ preferences }: { preferences: UserPreferenc
                   {preference.source === 'explicit'
                     ? 'You set this'
                     : preference.source === 'behavioral'
-                      ? `Learned (${preference.signalCount} signals)`
+                      ? `Learned (${preference.signalCount} signal${preference.signalCount === 1 ? '' : 's'})`
                       : humanize(preference.source)}
                 </td>
                 <td className="py-2.5 text-right">

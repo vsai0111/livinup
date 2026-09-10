@@ -14,8 +14,10 @@ import { cn } from '@/lib/utils/cn'
  */
 
 const CONTROL =
-  'w-full rounded-[var(--radius-control)] border border-line-strong bg-surface px-3 py-2.5 ' +
-  'text-ink placeholder:text-ink-subtle disabled:opacity-60 aria-[invalid=true]:border-negative'
+  'w-full rounded-[var(--radius-control)] border border-line-strong bg-surface px-3.5 text-sm ' +
+  'h-11 text-ink placeholder:text-ink-subtle transition-colors ' +
+  'hover:border-ink-subtle disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:opacity-60 ' +
+  'aria-[invalid=true]:border-negative'
 
 export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   label: string
@@ -43,7 +45,7 @@ export function Field({ label, error, hint, className, ...props }: FieldProps) {
       />
 
       {hint && (
-        <p id={hintId} className="text-ink-subtle text-xs">
+        <p id={hintId} className="text-ink-subtle text-xs leading-relaxed">
           {hint}
         </p>
       )}
@@ -81,7 +83,7 @@ export function SelectField({
       >
         {label}
       </label>
-      <select id={id} className={cn(CONTROL, 'pr-8', className)} {...props}>
+      <select id={id} className={cn(CONTROL, 'cursor-pointer pr-8', className)} {...props}>
         {children}
       </select>
     </div>

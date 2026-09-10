@@ -15,6 +15,7 @@ import { listBrands } from '@/lib/products/repository'
 import { humanize } from '@/lib/utils/format'
 import { PreferenceEditor } from '@/components/preferences/PreferenceEditor'
 import { LearnedPreferences } from '@/components/preferences/LearnedPreferences'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 export const metadata = { title: 'Preferences' }
 
@@ -35,14 +36,12 @@ export default async function PreferencesPage() {
   ])
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 py-2">
-      <header>
-        <h1 className="text-ink text-2xl font-semibold tracking-tight">Preferences</h1>
-        <p className="text-ink-muted mt-1 text-sm">
-          These drive your feed. Add or remove anything — changes take effect immediately, and
-          anything LivinUp worked out from your activity is marked and can be deleted.
-        </p>
-      </header>
+    <div className="mx-auto max-w-3xl space-y-5">
+      <PageHeader
+        title="Preferences"
+        description="These drive your feed. Add or remove anything — changes take effect immediately, and anything LivinUp worked out from your activity is marked and can be deleted."
+        className="mb-8"
+      />
 
       <PreferenceEditor
         attribute="category"
@@ -95,9 +94,9 @@ export default async function PreferencesPage() {
 
       <LearnedPreferences preferences={preferences} />
 
-      <section className="border-line bg-surface rounded-[var(--radius-card)] border p-5">
+      <section className="border-line bg-surface-sunken mt-8 rounded-[var(--radius-card)] border p-5">
         <h2 className="text-ink text-sm font-semibold">How these are used</h2>
-        <ul className="text-ink-muted mt-3 space-y-2 text-sm">
+        <ul className="text-ink-muted mt-3 space-y-2.5 text-sm leading-relaxed">
           <li>Preferences you set yourself outrank anything LivinUp infers from your behaviour.</li>
           <li>
             A preference is only learned from your activity after the same signal repeats, so one

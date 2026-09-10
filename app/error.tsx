@@ -24,13 +24,13 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col justify-center px-5 text-center">
-      <h1 className="text-ink text-xl font-semibold">Something went wrong</h1>
-      <p className="text-ink-muted mt-2 text-sm">
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center px-5 text-center">
+      <h1 className="text-ink text-2xl font-semibold">Something went wrong</h1>
+      <p className="text-ink-muted mt-2.5 text-sm leading-relaxed">
         This one is on us, not on you. Trying again often works.
       </p>
 
-      <div className="mt-6 flex justify-center gap-3">
+      <div className="mt-7 flex flex-wrap justify-center gap-2.5">
         <Button onClick={reset}>Try again</Button>
         <ButtonLink href="/home" variant="secondary">
           Go to your feed
@@ -38,7 +38,7 @@ export default function GlobalError({
       </div>
 
       {error.digest && (
-        <p className="text-ink-subtle mt-6 text-xs">
+        <p className="text-ink-subtle mt-8 text-xs">
           Reference: <code className="font-mono">{error.digest}</code>
         </p>
       )}

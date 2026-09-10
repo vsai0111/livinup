@@ -57,15 +57,21 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
   const to = Math.min(results.page * results.pageSize, results.total)
 
   return (
-    <div className="py-2">
-      <h1 className="sr-only">Search products</h1>
+    <div>
+      <div className="mb-7">
+        <h1 className="text-ink text-2xl font-semibold sm:text-[1.75rem]">Search</h1>
+        <p className="text-ink-muted mt-1.5 text-sm leading-relaxed">
+          Everything in the catalogue. Filters and sorting live in the address bar, so any result
+          page can be bookmarked or shared.
+        </p>
+      </div>
 
       <SearchBar defaultValue={query.text ?? ''} query={query} />
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[240px_1fr]">
+      <div className="mt-7 grid gap-7 lg:grid-cols-[240px_1fr] lg:gap-8">
         <SearchFilters query={query} facets={results.facets} priceBounds={results.priceBounds} />
 
-        <div>
+        <div className="min-w-0">
           {/* Announced politely so result counts reach screen readers on update. */}
           <p role="status" aria-live="polite" className="text-ink-muted mb-4 text-sm">
             {results.total === 0
