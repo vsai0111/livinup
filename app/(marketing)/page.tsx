@@ -1,18 +1,22 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { APP_NAME, APP_TAGLINE } from '@/config/app'
 import { getCurrentUser } from '@/lib/auth'
 import { getDb } from '@/lib/db'
 import { recordEvent } from '@/lib/analytics/events'
 import { ensureSessionId } from '@/lib/analytics/session'
-import { ButtonLink } from '@/components/ui/Button'
-import { Container } from '@/components/ui/Container'
-import { Section, SectionHeading } from '@/components/ui/Section'
-import { MarketingNav } from '@/components/marketing/MarketingNav'
-import { MarketingFooter } from '@/components/marketing/MarketingFooter'
-import { FeedPreview } from '@/components/marketing/FeedPreview'
+import { LandingNav } from '@/components/marketing/LandingNav'
+import { LandingFooter } from '@/components/marketing/LandingFooter'
+import { ScrollEffects } from '@/components/marketing/ScrollEffects'
+import { Cursor } from '@/components/marketing/Cursor'
+import { Marquee } from '@/components/marketing/Marquee'
+import { Asterisk } from '@/components/marketing/Asterisk'
+import { Note } from '@/components/marketing/Note'
+import { HeroArc } from '@/components/marketing/HeroArc'
+import { AppShowcase } from '@/components/marketing/AppShowcase'
+import { PersonaBento } from '@/components/marketing/PersonaBento'
 import { PricePreview } from '@/components/marketing/PricePreview'
-import { PreferencePreview } from '@/components/marketing/PreferencePreview'
-import { DiscoverPreview } from '@/components/marketing/DiscoverPreview'
+import '@/components/marketing/landing.css'
 
 export const metadata = { title: `${APP_NAME} — ${APP_TAGLINE}` }
 
@@ -22,10 +26,11 @@ export const metadata = { title: `${APP_NAME} — ${APP_TAGLINE}` }
  * Signed-in visitors go straight to their feed; there is no reason to make
  * someone read a pitch for a product they already use.
  *
- * Every claim below describes something the application actually does. The
- * mockups are static — see components/marketing/showcase-data.ts — but the
- * fields they show (deal bands, 30/90-day typical prices, preference match
- * percentages, merchant offers) are all real outputs of the product.
+ * The page runs its own visual language, scoped under `.lp` (see landing.css)
+ * so the signed-in product stays white-first and quiet. Every claim maps to
+ * something the application computes; the mockups are static illustrations
+ * built from showcase-data.ts, and they show the product's real white UI rather
+ * than a restyled version of it.
  */
 export default async function LandingPage() {
   const user = await getCurrentUser()
@@ -38,21 +43,24 @@ export default async function LandingPage() {
   await recordEvent(db, { eventType: 'landing_view', sessionId })
 
   return (
-    <>
-      <MarketingNav />
+    <div className="lp">
+      <Cursor />
+      <ScrollEffects />
+      <LandingNav />
 
-      <main id="main" className="flex-1">
+      <main id="main">
         <Hero />
-        <ValueStrip />
-        <HowItWorks />
-        <Discover />
-        <Personalization />
-        <PriceIntelligence />
-        <FinalCta />
+        <Ticker />
+        <Statement />
+        <FeedSection />
+        <PriceSection />
+        <PersonalizationSection />
+        <WhySection />
+        <Finale />
       </main>
 
-      <MarketingFooter />
-    </>
+      <LandingFooter />
+    </div>
   )
 }
 
@@ -60,276 +68,316 @@ export default async function LandingPage() {
 
 function Hero() {
   return (
-    <section aria-labelledby="hero-heading" className="pt-14 pb-16 sm:pt-20 sm:pb-24">
-      <Container>
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="border-line text-ink-muted inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium">
-            <span className="bg-accent h-1.5 w-1.5 rounded-full" aria-hidden="true" />
-            Personalized discovery with real price history
-          </p>
+    <section className="relative overflow-hidden pt-32 pb-0 sm:pt-40" aria-labelledby="hero">
+      <div className="lp-rules" aria-hidden="true" />
 
-          <h1
-            id="hero-heading"
-            className="text-ink mt-6 text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl lg:text-6xl"
-          >
-            Find products that actually fit your life.
-          </h1>
+      <div className="lp-shell relative">
+        <h1 id="hero" className="lp-display text-center">
+          <span className="lp-rise" style={{ ['--d' as string]: 0 }}>
+            <span>Worth buying.</span>
+          </span>
+          <span className="lp-rise" style={{ ['--d' as string]: 1 }}>
+            {/*
+              Real spaces around the glyph, not just its margin. JSX drops the
+              whitespace either side of an element on its own line, which left
+              the heading announcing "Worthpaying." to a screen reader while
+              looking correct on screen.
+            */}
+            <span>
+              Worth{' '}
+              <Asterisk className="lp-hero-mark" color="var(--lp-purple)" weight={3.1} />{' '}
+              paying.
+            </span>
+          </span>
+        </h1>
 
-          <p className="text-ink-muted mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty">
-            {APP_NAME} learns what you like, then shows you what is worth buying — and whether
-            today&apos;s price is genuinely worth paying, based on prices we have actually recorded.
-          </p>
+        <p
+          className="lp-fade mx-auto mt-8 max-w-2xl text-center text-lg leading-relaxed sm:text-xl"
+          style={{ ['--d' as string]: 3, color: 'var(--lp-ink-muted)' }}
+        >
+          Personalised discovery built on <span className="lp-token">recorded price history</span>,{' '}
+          <span className="lp-token">deal scoring</span>,{' '}
+          <span className="lp-token">preference matching</span> and{' '}
+          <span className="lp-token">merchant comparison</span>.
+        </p>
 
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <ButtonLink href="/signup" size="lg" className="w-full sm:w-auto">
-              Get started
-            </ButtonLink>
-            <ButtonLink
-              href="#how-it-works"
-              variant="secondary"
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              See how it works
-            </ButtonLink>
-          </div>
-
-          <p className="text-ink-subtle mt-4 text-xs">
-            Free to use. A few questions to start — skip any of them.
-          </p>
+        <div
+          className="lp-fade mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          style={{ ['--d' as string]: 4 }}
+        >
+          <Link href="/signup" className="lp-btn lp-btn-lime lp-magnet w-full sm:w-auto">
+            Get started — it&apos;s free
+          </Link>
+          <a href="#how" className="lp-btn lp-btn-outline w-full sm:w-auto">
+            See how it works
+          </a>
         </div>
 
-        <FeedPreview className="mt-14 sm:mt-16" />
-      </Container>
+        <p
+          className="lp-fade mt-5 text-center"
+          style={{ ['--d' as string]: 5, color: 'var(--lp-ink-faint)' }}
+        >
+          <span className="lp-label">A few questions to start · skip any of them</span>
+        </p>
+      </div>
+
+      <HeroArc />
     </section>
   )
 }
 
-/* ----------------------------------------------------------- Value strip -- */
+/* ---------------------------------------------------------------- Ticker -- */
 
-const VALUES = [
-  {
-    title: 'Personalized',
-    body: 'Tell LivinUp what you like and every recommendation is ranked against it — and shows you which preferences it met.',
-  },
-  {
-    title: 'Price intelligence',
-    body: 'Compare the price today against what a listing has actually cost over time, not against a marketing “was” price.',
-  },
-  {
-    title: 'Less noise',
-    body: 'One feed instead of ten tabs. Products that do not fit what you told us are ranked down, not padded in.',
-  },
+const TICKER = [
+  'Recorded price history, not marketing claims',
+  'Five deal bands, reasoning shown',
+  'Thin evidence? We say so',
+  'Every merchant we track, side by side',
+  'Preferences you can see and delete',
 ]
 
-function ValueStrip() {
+function Ticker() {
+  return <Marquee items={TICKER} />
+}
+
+/* ------------------------------------------------------------- Statement -- */
+
+function Statement() {
   return (
-    <section aria-labelledby="values-heading" className="border-line border-y">
-      <Container>
-        <h2 id="values-heading" className="sr-only">
-          Why {APP_NAME}
+    <section className="lp-section" id="how" aria-labelledby="statement">
+      <div className="lp-shell-narrow relative">
+        <h2 id="statement" className="lp-statement lp-reveal text-center">
+          {APP_NAME} learns what actually suits you, then scores every price against what that
+          listing has genuinely cost over time. No black box, and no invented discounts.
         </h2>
-        <ul className="divide-line grid divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          {VALUES.map((value) => (
-            <li key={value.title} className="py-8 sm:px-7 sm:py-10 sm:first:pl-0 sm:last:pr-0">
-              <h3 className="text-ink text-sm font-semibold">{value.title}</h3>
-              <p className="text-ink-muted mt-2 text-sm leading-relaxed">{value.body}</p>
+
+        <ol className="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['Tell us what you like', 'Fits, colours, categories, roughly what you spend.'],
+            ['It learns as you go', 'Saves, likes and dismissals keep sharpening the picture.'],
+            ['Discover what matches', 'Every product shows which preferences it met.'],
+            ['Buy at the right time', 'Scored against its own recorded price history.'],
+          ].map(([title, body], index) => (
+            <li
+              key={title}
+              className="lp-inview"
+              style={{ transitionDelay: `${index * 80}ms`, borderTop: '1px solid var(--lp-line)' }}
+            >
+              <p className="lp-label pt-5">{String(index + 1).padStart(2, '0')}</p>
+              <h3 className="mt-3 text-lg leading-tight font-medium tracking-tight">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--lp-ink-muted)' }}>
+                {body}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ Feed -- */
+
+function FeedSection() {
+  return (
+    <section
+      className="lp-section lp-dark relative overflow-hidden"
+      id="feed"
+      aria-labelledby="feed-h"
+    >
+      <div className="lp-shell relative">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-xl">
+            <p className="lp-label lp-label-chip">The product</p>
+            <h2 id="feed-h" className="lp-display-sm mt-5">
+              A feed that explains itself.
+            </h2>
+            <p
+              className="mt-5 max-w-lg text-base leading-relaxed"
+              style={{ color: 'var(--lp-on-dark-muted)' }}
+            >
+              Every card carries the reason it reached you, what the price has done over time, and
+              the merchants that stock it. Nothing is ranked by a number you cannot see.
+            </p>
+          </div>
+
+          <Note tone="lime" className="hidden lg:inline-flex">
+            This is the real thing
+          </Note>
+        </div>
+
+        <div className="lp-inview mt-12">
+          <AppShowcase />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ----------------------------------------------------- Price intelligence -- */
+
+function PriceSection() {
+  return (
+    <section className="lp-section relative overflow-hidden" id="price" aria-labelledby="price-h">
+      <div className="lp-shell relative">
+        <div className="relative grid place-items-center">
+          <span className="lp-orbit" aria-hidden="true" />
+
+          {/* Ghost words the centrepiece sits on top of. */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-between"
+            aria-hidden="true"
+          >
+            <span className="lp-ghost">Good</span>
+            <span className="lp-ghost">Price?</span>
+          </div>
+
+          <div className="relative z-10 w-full max-w-2xl text-center">
+            <p className="lp-label lp-label-chip">Price intelligence</p>
+            <h2 id="price-h" className="lp-display-sm mt-5">
+              Is this actually a good price?
+            </h2>
+            <p
+              className="mx-auto mt-5 max-w-md text-base leading-relaxed"
+              style={{ color: 'var(--lp-ink-muted)' }}
+            >
+              Scored against the listing&apos;s own recorded history — never against a
+              merchant&apos;s &ldquo;was&rdquo; price.
+            </p>
+          </div>
+
+          <div className="lp-inview relative z-10 mt-10 w-full max-w-2xl">
+            <PricePreview />
+            <Note className="mt-4 ml-4" flip>
+              Lowest we have ever recorded
+            </Note>
+          </div>
+        </div>
+
+        <ul className="mt-20 grid gap-8 sm:grid-cols-3">
+          {[
+            ['Current vs typical', 'The 30- and 90-day typical price, and the lowest ever seen.'],
+            ['Five plain bands', 'Poor through Excellent, with the reasoning listed.'],
+            ['Honest about gaps', 'Too little history and it says so instead of guessing.'],
+          ].map(([title, body], index) => (
+            <li key={title} className="lp-inview" style={{ transitionDelay: `${index * 80}ms` }}>
+              <h3 className="text-base font-medium tracking-tight">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--lp-ink-muted)' }}>
+                {body}
+              </p>
             </li>
           ))}
         </ul>
-      </Container>
-    </section>
-  )
-}
-
-/* ---------------------------------------------------------- How it works -- */
-
-const STEPS = [
-  {
-    title: 'Tell us what you like',
-    body: 'A handful of questions about what you shop for, the fits and colours you go for, and roughly what you spend. Skip anything you would rather not answer.',
-  },
-  {
-    title: 'LivinUp learns your preferences',
-    body: 'What you save, like and dismiss keeps refining the picture. Everything it works out is visible on your preferences page, and you can delete any of it.',
-  },
-  {
-    title: 'Discover products that match',
-    body: 'Your feed is ranked against your preferences, and every product tells you which of them it met — and which it did not.',
-  },
-  {
-    title: 'Know when the price is worth it',
-    body: 'Each listing is scored against its own recorded price history. When there is not enough history to be sure, LivinUp says so instead of guessing.',
-  },
-]
-
-function HowItWorks() {
-  return (
-    <Section id="how-it-works" labelledBy="how-heading" size="lg">
-      <SectionHeading
-        id="how-heading"
-        eyebrow="How it works"
-        title="Four steps, and you are set up."
-        description="No endless questionnaire, and nothing you cannot change later."
-      />
-
-      <ol className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((step, index) => (
-          <li key={step.title} className="border-line border-t pt-5">
-            <p className="text-ink-subtle font-mono text-xs font-medium">
-              {String(index + 1).padStart(2, '0')}
-            </p>
-            <h3 className="text-ink mt-3 text-base font-semibold">{step.title}</h3>
-            <p className="text-ink-muted mt-2 text-sm leading-relaxed">{step.body}</p>
-          </li>
-        ))}
-      </ol>
-    </Section>
-  )
-}
-
-/* -------------------------------------------------------------- Discover -- */
-
-const DISCOVER_POINTS = [
-  'Ranked against the preferences you set, not an opaque trending list.',
-  'Save, like or dismiss anything — each one sharpens what comes next.',
-  'Compare every merchant LivinUp has ingested for a product, side by side.',
-]
-
-function Discover() {
-  return (
-    <Section id="discover" labelledBy="discover-heading" tone="sunken" bordered size="lg">
-      <div className="grid items-center gap-12 lg:grid-cols-[1fr_minmax(0,26rem)] lg:gap-16">
-        <div>
-          <SectionHeading
-            id="discover-heading"
-            eyebrow="Discover"
-            title="A feed that explains itself."
-            description="Every product carries the reason it reached you, the merchants that stock it, and what its price has done over time. Nothing is ranked by a number you cannot see."
-            align="start"
-          />
-
-          <ul className="mt-8 space-y-4">
-            {DISCOVER_POINTS.map((point) => (
-              <li key={point} className="text-ink-muted flex gap-3 text-sm leading-relaxed">
-                <CheckMark />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-
-          <ButtonLink href="/signup" className="mt-9">
-            Get started
-          </ButtonLink>
-        </div>
-
-        <DiscoverPreview />
       </div>
-    </Section>
+    </section>
   )
 }
 
 /* ------------------------------------------------------- Personalization -- */
 
-function Personalization() {
+function PersonalizationSection() {
   return (
-    <Section id="personalization" labelledBy="personalization-heading" size="lg">
-      <SectionHeading
-        id="personalization-heading"
-        eyebrow="Personalization"
-        title="Preferences you can actually see."
-        description="LivinUp maps every product onto the same vocabulary — fit, style, colour, material, brand, price band — so a shirt from one merchant can be compared with a shirt from another."
-      />
+    <section className="lp-section" aria-labelledby="persona-h">
+      <div className="lp-shell">
+        <div className="mb-12 max-w-2xl">
+          <p className="lp-label lp-label-chip">Personalisation</p>
+          <h2 id="persona-h" className="lp-display-sm mt-5">
+            Preferences you can actually see.
+          </h2>
+        </div>
 
-      <PreferencePreview className="mt-14" />
-
-      <p className="text-ink-subtle mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed">
-        A preference is only learned from your behaviour once the same signal repeats, so one
-        curious click never becomes a stated taste.
-      </p>
-    </Section>
+        <PersonaBento />
+      </div>
+    </section>
   )
 }
 
-/* ---------------------------------------------------- Price intelligence -- */
+/* ------------------------------------------------------------------- Why -- */
 
-const PRICE_POINTS = [
-  'Scored on recorded prices, never on a merchant’s “was” price.',
-  'Five plain bands, from Poor to Excellent, with the reasoning shown.',
-  'Too little history? LivinUp says so rather than inventing a verdict.',
+const REASONS = [
+  [
+    'Priced on evidence',
+    'Every deal score comes from prices we have recorded for that exact listing. When there are too few to be sure, LivinUp says so rather than dressing a guess up as a verdict.',
+  ],
+  [
+    'Ranked in the open',
+    'Each product shows which of your preferences it met and which it missed, with the arithmetic available. Anything LivinUp infers from your behaviour is listed and can be deleted.',
+  ],
+  [
+    'Honest about its limits',
+    'It compares the merchants it has ingested and never claims to know every price on the internet. It earns a commission on some links, which changes neither your price nor the ranking.',
+  ],
 ]
 
-function PriceIntelligence() {
+function WhySection() {
   return (
-    <Section id="price-intelligence" labelledBy="price-heading" tone="sunken" bordered size="lg">
-      <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-        <div className="lg:sticky lg:top-24">
-          <SectionHeading
-            id="price-heading"
-            eyebrow="Price intelligence"
-            title="Is this actually a good price?"
-            description="LivinUp records what a listing costs over time and scores the price today against its own history — the current price, the 30- and 90-day typical, and the lowest we have seen."
-            align="start"
-          />
-
-          <ul className="mt-8 space-y-4">
-            {PRICE_POINTS.map((point) => (
-              <li key={point} className="text-ink-muted flex gap-3 text-sm leading-relaxed">
-                <CheckMark />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
+    <section className="lp-section" id="why" aria-labelledby="why-h">
+      <div className="lp-shell">
+        <div className="relative max-w-3xl">
+          <h2 id="why-h" className="lp-display-sm">
+            Built to be checked, not trusted blindly.
+          </h2>
+          <Note className="mt-4">Why {APP_NAME}?</Note>
         </div>
 
-        <PricePreview />
+        <dl className="lp-deflist mt-14">
+          {REASONS.map(([title, body], index) => (
+            <div
+              key={title}
+              className="lp-defrow lp-inview"
+              style={{ transitionDelay: `${index * 70}ms` }}
+            >
+              <dt className="text-lg font-medium tracking-tight">{title}</dt>
+              <dd className="text-base leading-relaxed" style={{ color: 'var(--lp-ink-muted)' }}>
+                {body}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
-    </Section>
+    </section>
   )
 }
 
-/* ------------------------------------------------------------- Final CTA -- */
+/* ---------------------------------------------------------------- Finale -- */
 
-function FinalCta() {
+function Finale() {
   return (
-    <Section labelledBy="cta-heading" size="lg" width="content">
-      <div className="text-center">
-        <h2 id="cta-heading" className="text-ink text-3xl font-semibold text-balance sm:text-4xl">
-          Shop with more confidence.
-        </h2>
-        <p className="text-ink-muted mx-auto mt-4 max-w-xl text-lg leading-relaxed text-pretty">
-          Tell {APP_NAME} what you like. We&apos;ll help you find what is worth your attention.
-        </p>
-
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <ButtonLink href="/signup" size="lg" className="w-full sm:w-auto">
-            Get started
-          </ButtonLink>
-          <ButtonLink href="/signin" variant="secondary" size="lg" className="w-full sm:w-auto">
-            Sign in
-          </ButtonLink>
-        </div>
-      </div>
-    </Section>
-  )
-}
-
-/* ------------------------------------------------------------------ Bits -- */
-
-function CheckMark() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className="text-accent mt-0.5 h-4 w-4 shrink-0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
+    <section
+      className="lp-dark relative overflow-hidden pt-24 pb-20 sm:pt-32"
+      aria-labelledby="cta-h"
     >
-      <path d="m4 10.5 4 4 8-9" />
-    </svg>
+      <div className="lp-shell relative">
+        {/* Words spread edge to edge, the way the reference closes its page. */}
+        <h2
+          id="cta-h"
+          className="lp-display flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2"
+        >
+          <span>Level</span>
+          <span>up</span>
+          <span>your</span>
+          <span>lifestyle.</span>
+        </h2>
+
+        <div className="mt-16 flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
+          <p
+            className="max-w-md text-base leading-relaxed"
+            style={{ color: 'var(--lp-on-dark-muted)' }}
+          >
+            Tell {APP_NAME} what you like. We&apos;ll help you find what is worth your attention —
+            and tell you when the price is worth paying.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link href="/signup" className="lp-btn lp-btn-lime lp-magnet">
+              Get started
+            </Link>
+            <Link href="/signin" className="lp-btn lp-btn-outline">
+              Sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }

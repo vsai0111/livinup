@@ -140,3 +140,42 @@ export const SHOWCASE_OFFERS = [
   { merchant: 'Fieldhouse', price: '$86', availability: 'In stock', best: false },
   { merchant: 'Halden & Co', price: '$94', availability: 'Low stock', best: false },
 ]
+
+/**
+ * The fan of cards under the hero.
+ *
+ * Seven rather than four, because an arc needs enough members to read as a
+ * curve. Same rules as everything above: real deal bands, real taxonomy terms,
+ * and the deterministic placeholder imagery the catalogue itself uses.
+ */
+export const SHOWCASE_ARC: readonly ShowcaseProduct[] = [
+  ...SHOWCASE_FEED,
+  {
+    slug: 'voss-atelier-wool-overcoat',
+    brand: 'Voss Atelier',
+    title: 'Wool Overcoat',
+    price: '$394',
+    merchant: 'Fieldhouse',
+    band: 'fair',
+    bandLabel: 'Fair',
+  },
+  {
+    slug: 'tenby-suede-penny-loafer',
+    brand: 'Tenby',
+    title: 'Suede Penny Loafer',
+    price: '$197',
+    wasPrice: '$240',
+    merchant: 'Halden & Co',
+    band: 'good',
+    bandLabel: 'Good',
+  },
+  {
+    slug: 'oland-ceramic-table-lamp',
+    brand: 'Öland',
+    title: 'Ceramic Table Lamp',
+    price: '$155',
+    merchant: 'Two Rivers',
+    band: 'great',
+    bandLabel: 'Great',
+  },
+]

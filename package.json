@@ -19,6 +19,7 @@
     "db:seed": "tsx --conditions=react-server scripts/db-seed.ts",
     "db:reset": "tsx --conditions=react-server scripts/db-reset.ts",
     "db:setup": "npm run db:migrate && npm run db:seed",
+    "ingest": "tsx --conditions=react-server scripts/ingest.ts",
     "verify": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {

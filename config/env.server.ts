@@ -24,6 +24,27 @@ const schema = z.object({
 
   SENTRY_DSN: z.string().optional().or(z.literal('')),
   LIVINUP_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+
+  // --- Product ingestion ---------------------------------------------------
+  // All optional. A provider whose credentials are absent reports itself as
+  // not ready and is skipped; that is the normal state of an integration still
+  // waiting on account approval, not a configuration error.
+  INGESTION_CRON_SECRET: z.string().optional().or(z.literal('')),
+
+  FLIPKART_AFFILIATE_TRACKING_ID: z.string().optional().or(z.literal('')),
+  FLIPKART_AFFILIATE_TOKEN: z.string().optional().or(z.literal('')),
+  /** Comma-separated Flipkart feed category ids, from the affiliate listing endpoint. */
+  FLIPKART_FEED_CATEGORIES: z.string().optional().or(z.literal('')),
+
+  /**
+   * Admitad advertiser feeds, `;`-separated:
+   *   slug|Display Name|https://store.example|host1,host2|https://feed-url
+   */
+  ADMITAD_FEEDS: z.string().optional().or(z.literal('')),
+
+  CUELINKS_API_KEY: z.string().optional().or(z.literal('')),
+  /** Cuelinks link-conversion endpoint. Confirm against the account's API reference. */
+  CUELINKS_CONVERT_URL: z.string().url().optional().or(z.literal('')),
 })
 
 export type ServerEnv = z.infer<typeof schema>
