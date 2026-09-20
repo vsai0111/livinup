@@ -84,8 +84,7 @@ function Hero() {
               looking correct on screen.
             */}
             <span>
-              Worth{' '}
-              <Asterisk className="lp-hero-mark" color="var(--lp-purple)" weight={3.1} />{' '}
+              Worth <Asterisk className="lp-hero-mark" color="var(--lp-purple)" weight={3.1} />{' '}
               paying.
             </span>
           </span>
