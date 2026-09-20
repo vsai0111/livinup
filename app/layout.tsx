@@ -22,7 +22,14 @@ export const metadata: Metadata = {
     //
     // Not a secret: a verification token is public by design, and is worthless
     // to anyone who does not already control the DNS for livinup.in.
-    other: { 'mitgo-verification': '7344ff2a-acfe-4121-ae8e-73012bd90aa3' },
+    // An array emits one <meta> per value, so both tokens stand side by side
+    // and verifying the second does not invalidate the first.
+    other: {
+      'mitgo-verification': [
+        '7344ff2a-acfe-4121-ae8e-73012bd90aa3',
+        '119f1e72-d546-4f11-bd57-7eb8a46a3df3',
+      ],
+    },
   },
 }
 
