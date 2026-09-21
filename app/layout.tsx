@@ -29,6 +29,7 @@ export const metadata: Metadata = {
         '7344ff2a-acfe-4121-ae8e-73012bd90aa3',
         '119f1e72-d546-4f11-bd57-7eb8a46a3df3',
       ],
+      'cuelinks-verification': 'VERIFY-CL-HO13DMUI',
     },
   },
 }
