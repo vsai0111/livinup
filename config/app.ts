@@ -1,9 +1,9 @@
 /** Static application metadata and navigation. */
 
 export const APP_NAME = 'LivinUp'
-export const APP_TAGLINE = 'Level up your lifestyle.'
+export const APP_TAGLINE = 'Know what you own. Know what to wear.'
 export const APP_DESCRIPTION =
-  'LivinUp learns what you like and tells you when it is genuinely a good time to buy.'
+  'LivinUp turns the clothes you already own into a digital wardrobe, builds outfits from them, and helps you discover the stylists, brands and pieces that suit you.'
 
 /** Primary authenticated navigation. */
 export const PRIMARY_NAV = [

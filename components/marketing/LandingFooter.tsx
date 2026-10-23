@@ -15,7 +15,13 @@ export function LandingFooter() {
   return (
     <footer className="lp-dark relative overflow-hidden">
       <Marquee
-        items={[APP_TAGLINE, 'Personalised discovery', 'Real price history', 'Free to start']}
+        items={[
+          APP_TAGLINE,
+          'Your digital wardrobe',
+          'AI outfit styling',
+          'Brands worth discovering',
+          'Free to start',
+        ]}
       />
 
       <div className="lp-shell py-14">
@@ -37,10 +43,12 @@ export function LandingFooter() {
               </h2>
               <ul className="mt-4 space-y-2.5">
                 {[
+                  ['#wardrobe', 'Your wardrobe'],
+                  ['#styling', 'AI styling'],
+                  ['#gaps', 'What is missing'],
+                  ['#brands', 'Brands'],
+                  ['#stylists', 'Stylists'],
                   ['#how', 'How it works'],
-                  ['#feed', 'The feed'],
-                  ['#price', 'Price intelligence'],
-                  ['#why', `Why ${APP_NAME}`],
                 ].map(([href, label]) => (
                   <li key={href}>
                     <a href={href} className="text-sm transition-opacity hover:opacity-60">
@@ -82,8 +90,10 @@ export function LandingFooter() {
             className="max-w-xl text-xs leading-relaxed"
             style={{ color: 'var(--lp-on-dark-muted)' }}
           >
-            {APP_NAME} links out to merchants and may earn a commission. It never changes the price
-            you pay, and it never affects how products are ranked.
+            Stylist booking and brand profiles are in development, and the examples shown on this
+            page are illustrations rather than real brands, stylists or customers. {APP_NAME} links
+            out to the brands it partners with and may earn a commission; it never changes the price
+            you pay, and it never affects what gets recommended to you.
           </p>
         </div>
       </div>

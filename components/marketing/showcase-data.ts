@@ -2,180 +2,265 @@
  * Illustrative data for the landing-page product mockups.
  *
  * These are marketing visuals — the equivalent of a product screenshot — not a
- * live view of the catalogue. They are kept here, apart from the components, so
- * it is obvious at a glance that the landing page invents nothing beyond them.
+ * live view of anyone's wardrobe. They are kept here, apart from the
+ * components, so it is obvious at a glance that the landing page invents
+ * nothing beyond them.
  *
- * Two rules govern what may appear below:
+ * Three rules govern what may appear below:
  *
- *   1. Every field corresponds to something the application genuinely computes.
- *      Prices, the 30/90-day typical, the lowest recorded price, the observation
- *      count, the five deal bands and the preference-match percentage are all
- *      real outputs of lib/deals and lib/recommendations. Nothing here is a
- *      metric the product cannot actually produce.
- *   2. Attribute values come from the controlled vocabulary in config/taxonomy —
- *      `boxy`, `relaxed`, `tailored` are real fits, not invented ones.
- *
- * Imagery reuses /api/product-image, the same deterministic placeholder route
- * the catalogue itself uses, rather than stock photography of products that do
- * not exist.
+ *   1. Nothing here is presented as a real person, a real brand, a real
+ *      stylist, a customer, a rating or a testimonial. Brand and stylist cards
+ *      carry a visible "illustration" label in the components that render them,
+ *      because those parts of the product are planned rather than built.
+ *   2. Garment attributes come from the controlled vocabulary the application
+ *      already uses — `boxy`, `relaxed`, `minimal` are real values, not
+ *      invented ones.
+ *   3. Imagery is drawn, not photographed. Wardrobe items render as line-art
+ *      silhouettes (see GarmentTile) rather than stock photos of garments
+ *      nobody owns.
  */
 
-export interface ShowcaseProduct {
-  slug: string
-  brand: string
-  title: string
-  price: string
-  wasPrice?: string
-  merchant: string
-  band: 'excellent' | 'great' | 'good' | 'fair' | 'poor' | null
-  bandLabel?: string
-  reason?: string
+/** Garment shapes GarmentTile can draw. */
+export type GarmentShape =
+  'shirt' | 'tee' | 'knit' | 'coat' | 'trousers' | 'skirt' | 'dress' | 'shoe' | 'bag'
+
+export interface WardrobeItem {
+  id: string
+  name: string
+  category: string
+  /** Swatch colour for the tile ground. Illustrative, not a catalogue value. */
+  tone: string
+  shape: GarmentShape
+  attributes: readonly string[]
 }
 
-/** The feed shown in the hero window. */
-export const SHOWCASE_FEED: readonly ShowcaseProduct[] = [
+/** The digital closet shown in the wardrobe section. */
+export const WARDROBE_ITEMS: readonly WardrobeItem[] = [
   {
-    slug: 'north-loop-boxy-oxford',
-    brand: 'North Loop',
-    title: 'Boxy Oxford Shirt',
-    price: '$68',
-    wasPrice: '$95',
-    merchant: 'Two Rivers',
-    band: 'great',
-    bandLabel: 'Great',
-    reason: 'Matches boxy fit and cotton',
+    id: 'oxford',
+    name: 'Boxy oxford shirt',
+    category: 'Shirts',
+    tone: '#e8eaf0',
+    shape: 'shirt',
+    attributes: ['boxy', 'cotton', 'white'],
   },
   {
-    slug: 'harrow-merino-crew',
-    brand: 'Harrow',
-    title: 'Merino Crew Knit',
-    price: '$124',
-    merchant: 'Fieldhouse',
-    band: 'good',
-    bandLabel: 'Good',
-    reason: 'Matches knitwear and neutral',
+    id: 'crew',
+    name: 'Merino crew knit',
+    category: 'Knitwear',
+    tone: '#e6ddcd',
+    shape: 'knit',
+    attributes: ['relaxed', 'merino', 'oatmeal'],
   },
   {
-    slug: 'calder-relaxed-chino',
-    brand: 'Calder',
-    title: 'Relaxed Chino',
-    price: '$79',
-    wasPrice: '$110',
-    merchant: 'Two Rivers',
-    band: 'excellent',
-    bandLabel: 'Excellent',
-    reason: 'Lowest price recorded so far',
+    id: 'chino',
+    name: 'Relaxed chino',
+    category: 'Trousers',
+    tone: '#d9dcc6',
+    shape: 'trousers',
+    attributes: ['relaxed', 'cotton', 'olive'],
   },
   {
-    slug: 'ashby-canvas-tote',
-    brand: 'Ashby',
-    title: 'Canvas Weekend Tote',
-    price: '$142',
-    merchant: 'Halden & Co',
-    band: null,
-    reason: 'Recently added',
+    id: 'overcoat',
+    name: 'Wool overcoat',
+    category: 'Outerwear',
+    tone: '#cfd2d6',
+    shape: 'coat',
+    attributes: ['tailored', 'wool', 'charcoal'],
+  },
+  {
+    id: 'midi',
+    name: 'Pleated midi skirt',
+    category: 'Skirts',
+    tone: '#dcd7e2',
+    shape: 'skirt',
+    attributes: ['fluid', 'twill', 'ink'],
+  },
+  {
+    id: 'tee',
+    name: 'Linen tee',
+    category: 'Tops',
+    tone: '#efe9df',
+    shape: 'tee',
+    attributes: ['boxy', 'linen', 'ecru'],
+  },
+  {
+    id: 'loafer',
+    name: 'Suede loafer',
+    category: 'Shoes',
+    tone: '#e3d3c0',
+    shape: 'shoe',
+    attributes: ['classic', 'suede', 'tan'],
+  },
+  {
+    id: 'tote',
+    name: 'Canvas tote',
+    category: 'Bags',
+    tone: '#e7e2d6',
+    shape: 'bag',
+    attributes: ['everyday', 'canvas', 'natural'],
+  },
+  {
+    id: 'slip',
+    name: 'Silk slip dress',
+    category: 'Dresses',
+    tone: '#dfe3e6',
+    shape: 'dress',
+    attributes: ['fluid', 'silk', 'slate'],
+  },
+  {
+    id: 'denim',
+    name: 'Straight denim',
+    category: 'Trousers',
+    tone: '#d3d9e4',
+    shape: 'trousers',
+    attributes: ['straight', 'denim', 'indigo'],
   },
 ]
 
-/**
- * The price-intelligence example.
- *
- * `points` are monthly observations for one listing; the statistics beneath are
- * derived from exactly those numbers, so the panel and the chart agree.
- */
-export const SHOWCASE_PRICE = {
-  product: 'Calder Relaxed Chino',
-  merchant: 'Two Rivers',
-  currency: '$',
-  points: [110, 110, 104, 110, 98, 110, 110, 92, 105, 110, 88, 79],
-  months: [
-    'Oct',
-    'Nov',
-    'Dec',
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-  ] as const,
-  current: '$79',
-  typical30: '$99',
-  typical90: '$103',
-  lowest: '$79',
-  observations: 12,
-  band: 'excellent' as const,
-  bandLabel: 'Excellent',
-  score: 94,
-  reasons: [
-    { sentiment: 'positive' as const, text: '28% below the 90-day typical price of $103.' },
-    { sentiment: 'positive' as const, text: 'The lowest price recorded for this listing.' },
-    { sentiment: 'neutral' as const, text: 'Based on 12 recorded prices over 341 days.' },
-  ],
-}
-
-/** The personalisation example — real taxonomy values, real scoring shape. */
-export const SHOWCASE_PREFERENCES = [
-  { attribute: 'fit', value: 'Boxy', selected: true },
-  { attribute: 'fit', value: 'Relaxed', selected: true },
-  { attribute: 'fit', value: 'Tailored', selected: false },
-  { attribute: 'style', value: 'Minimal', selected: true },
-  { attribute: 'color', value: 'Olive', selected: true },
-  { attribute: 'material', value: 'Cotton', selected: false },
+/** Categories listed down the side of the wardrobe mockup. */
+export const WARDROBE_CATEGORIES = [
+  { label: 'All items', active: true },
+  { label: 'Tops' },
+  { label: 'Knitwear' },
+  { label: 'Trousers' },
+  { label: 'Dresses' },
+  { label: 'Outerwear' },
+  { label: 'Shoes' },
+  { label: 'Bags' },
 ] as const
 
-export const SHOWCASE_MATCH = {
-  product: 'North Loop Boxy Oxford Shirt',
-  percent: '86%',
-  matched: ['Boxy', 'Cotton', 'Minimal'],
-  missed: ['Olive'],
+/** Occasions offered in the styling mockup. */
+export const OCCASIONS = ['Work', 'Dinner', 'Weekend', 'Travel', 'Event'] as const
+
+export interface Outfit {
+  id: string
+  occasion: string
+  title: string
+  /** Wardrobe item ids this look is built from. */
+  items: readonly string[]
+  /** Plain-language reason, the way the product would phrase one. */
+  why: string
+  tags: readonly string[]
 }
 
-/** Merchant comparison. LivinUp claims only the merchants it has ingested. */
-export const SHOWCASE_OFFERS = [
-  { merchant: 'Two Rivers', price: '$79', availability: 'In stock', best: true },
-  { merchant: 'Fieldhouse', price: '$86', availability: 'In stock', best: false },
-  { merchant: 'Halden & Co', price: '$94', availability: 'Low stock', best: false },
+/** Looks assembled from items already in the wardrobe above. */
+export const OUTFITS: readonly Outfit[] = [
+  {
+    id: 'o-1',
+    occasion: 'Work',
+    title: 'Quiet tailoring',
+    items: ['oxford', 'chino', 'loafer', 'overcoat'],
+    why: 'A boxy shirt softens the tailored coat, and the olive picks up the tan in the loafer.',
+    tags: ['Minimal', 'Layered', 'Neutral'],
+  },
+  {
+    id: 'o-2',
+    occasion: 'Dinner',
+    title: 'Slip and knit',
+    items: ['slip', 'crew', 'loafer'],
+    why: 'Knitwear over a slip keeps the line fluid while covering the shoulder.',
+    tags: ['Fluid', 'Tonal'],
+  },
+  {
+    id: 'o-3',
+    occasion: 'Weekend',
+    title: 'Ecru and indigo',
+    items: ['tee', 'denim', 'tote'],
+    why: 'Two easy shapes, one warm neutral against one cool — nothing competes.',
+    tags: ['Relaxed', 'Everyday'],
+  },
 ]
 
 /**
- * The fan of cards under the hero.
- *
- * Seven rather than four, because an arc needs enough members to read as a
- * curve. Same rules as everything above: real deal bands, real taxonomy terms,
- * and the deterministic placeholder imagery the catalogue itself uses.
+ * Gap suggestions. Described as pieces from participating brands rather than a
+ * universal catalogue, because that is what the product intends to be.
  */
-export const SHOWCASE_ARC: readonly ShowcaseProduct[] = [
-  ...SHOWCASE_FEED,
+export const GAP_SUGGESTIONS = [
   {
-    slug: 'voss-atelier-wool-overcoat',
-    brand: 'Voss Atelier',
-    title: 'Wool Overcoat',
-    price: '$394',
-    merchant: 'Fieldhouse',
-    band: 'fair',
-    bandLabel: 'Fair',
+    id: 'g-1',
+    name: 'Fine-gauge roll neck',
+    shape: 'knit' as GarmentShape,
+    tone: '#dcdfe3',
+    role: 'Carries the coat into winter',
   },
   {
-    slug: 'tenby-suede-penny-loafer',
-    brand: 'Tenby',
-    title: 'Suede Penny Loafer',
-    price: '$197',
-    wasPrice: '$240',
-    merchant: 'Halden & Co',
-    band: 'good',
-    bandLabel: 'Good',
+    id: 'g-2',
+    name: 'Woven leather belt, tan',
+    shape: 'bag' as GarmentShape,
+    tone: '#e0cdb6',
+    role: 'Ties the loafer to the chino',
   },
   {
-    slug: 'oland-ceramic-table-lamp',
-    brand: 'Öland',
-    title: 'Ceramic Table Lamp',
-    price: '$155',
-    merchant: 'Two Rivers',
-    band: 'great',
-    bandLabel: 'Great',
+    id: 'g-3',
+    name: 'Pointed flat, black',
+    shape: 'shoe' as GarmentShape,
+    tone: '#d6d6da',
+    role: 'The one evening shoe missing',
   },
-]
+] as const
+
+/**
+ * Brand discovery. The names are deliberately generic placeholders and every
+ * card is labelled as an illustration where it is rendered — no real label is
+ * represented here, and no figure below describes a real business.
+ */
+export const BRAND_CARDS = [
+  {
+    id: 'b-1',
+    name: 'Knitwear studio',
+    discipline: 'Slow-made merino, six pieces a season',
+    note: 'New collection',
+    tone: '#e3ddd2',
+    shape: 'knit' as GarmentShape,
+    palette: ['#e3ddd2', '#c3b7a3', '#8a8071', '#5e5950'],
+  },
+  {
+    id: 'b-2',
+    name: 'Tailoring atelier',
+    discipline: 'Made to order, two fittings',
+    note: 'Lookbook',
+    tone: '#d8dce2',
+    shape: 'coat' as GarmentShape,
+    palette: ['#d8dce2', '#a9b0bb', '#5e6673', '#2b2f36'],
+  },
+  {
+    id: 'b-3',
+    name: 'Everyday linen label',
+    discipline: 'One fabric, eight shapes',
+    note: 'Just launched',
+    tone: '#e9e2d6',
+    shape: 'tee' as GarmentShape,
+    palette: ['#e9e2d6', '#d6c7ae', '#b7a98f', '#7d7363'],
+  },
+  {
+    id: 'b-4',
+    name: 'Leather workshop',
+    discipline: 'Hand-finished, repairable',
+    note: 'Back in stock',
+    tone: '#e2d2bd',
+    shape: 'shoe' as GarmentShape,
+    palette: ['#e2d2bd', '#c9a97f', '#9b7748', '#5c452a'],
+  },
+] as const
+
+/**
+ * Stylist marketplace. Specialisations only: no names, no ratings, no
+ * consultation counts and no reviews, because no stylist has yet joined and
+ * inventing one would be a lie told at the moment a visitor is deciding
+ * whether to trust the product.
+ */
+export const STYLIST_SPECIALISMS = [
+  { id: 's-1', focus: 'Minimal tailoring', mode: 'Video consultation', scope: 'Capsule building' },
+  { id: 's-2', focus: 'Colour and contrast', mode: 'Chat styling', scope: 'Wardrobe audit' },
+  { id: 's-3', focus: 'Occasion dressing', mode: 'Video consultation', scope: 'Event looks' },
+] as const
+
+/** The five steps of the closing narrative. */
+export const JOURNEY = [
+  ['Your wardrobe', 'Photograph what you own. It becomes a closet you can browse.'],
+  ['AI styling', 'Outfits built from those pieces, for the occasion you pick.'],
+  ['Recommendations', 'The gaps worth filling, in the colours you actually wear.'],
+  ['Brands', 'Labels and launches that match the way you already dress.'],
+  ['Shopping', 'Buy the piece, or wear the look you already own. Both are a win.'],
+] as const

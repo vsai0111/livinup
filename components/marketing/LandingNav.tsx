@@ -18,10 +18,11 @@ import { Asterisk } from './Asterisk'
  */
 
 const LINKS = [
+  { href: '#wardrobe', label: 'Your wardrobe' },
+  { href: '#styling', label: 'AI styling' },
+  { href: '#brands', label: 'Brands' },
+  { href: '#stylists', label: 'Stylists' },
   { href: '#how', label: 'How it works' },
-  { href: '#feed', label: 'The feed' },
-  { href: '#price', label: 'Price intelligence' },
-  { href: '#why', label: `Why ${APP_NAME}` },
 ]
 
 export function LandingNav() {
@@ -101,8 +102,8 @@ export function LandingNav() {
           </nav>
 
           <div className="flex flex-wrap items-center gap-3 pt-8">
-            <Link href="/signup" className="lp-btn lp-btn-lime" onClick={() => setOpen(false)}>
-              Get started
+            <Link href="/signup" className="lp-btn lp-btn-paper" onClick={() => setOpen(false)}>
+              Build my wardrobe
             </Link>
             <Link href="/signin" className="lp-btn lp-btn-outline" onClick={() => setOpen(false)}>
               Sign in

@@ -1,11 +1,16 @@
 /*
  * Landing page design system.
  *
- * The marketing page runs its own visual language — warm grey canvas, display
- * typography at poster scale, lime and electric purple. The application stays
- * white-first and restrained. Everything here is therefore scoped under `.lp`
- * so none of it can reach the signed-in product; the two worlds share a URL
- * origin and nothing else.
+ * The marketing page runs its own visual language — warm ivory canvas, an
+ * editorial serif at poster scale, ink for actions and a small amount of lime
+ * carried over from the brand. The application stays white-first and
+ * restrained. Everything here is therefore scoped under `.lp` so none of it can
+ * reach the signed-in product; the two worlds share a URL origin and nothing
+ * else.
+ *
+ * The one exception is the product mockups, which are deliberately paper-white
+ * inside their frames: they are screenshots of a white product, and prettying
+ * them up to match this page would make the first run after signup a surprise.
  *
  * Written as plain CSS rather than utility strings because this page is one
  * bespoke composition, not a system of reusable parts. A forty-class string is
@@ -13,27 +18,29 @@
  */
 
 .lp {
-  /* Surfaces */
-  --lp-canvas: #f4f4f4;
+  /* Surfaces. Warm ivory rather than grey — fashion paper, not dashboard. */
+  --lp-canvas: #f3f1ed;
   --lp-paper: #ffffff;
-  --lp-chip: #eaeaea;
-  --lp-dark: #151313;
-  --lp-dark-soft: #1f1c1c;
+  --lp-chip: #e7e3dc;
+  --lp-dark: #161413;
+  --lp-dark-soft: #211e1b;
 
   /* Ink */
-  --lp-ink: #201d1d;
-  --lp-ink-muted: #6b6664;
-  --lp-ink-faint: #a8a3a0;
-  --lp-on-dark: #f4f2f0;
-  --lp-on-dark-muted: #938d8a;
+  --lp-ink: #1a1817;
+  --lp-ink-muted: #6b6460;
+  --lp-ink-faint: #a39c95;
+  --lp-on-dark: #f4f1ec;
+  --lp-on-dark-muted: #9b938a;
 
-  /* Accents. Lime is the call to action; purple is the brand mark. */
+  /* Accents. Lime is the brand carry-over; clay and purple are editorial. */
   --lp-lime: #a1ff62;
-  --lp-purple: #6840ff;
-  --lp-coral: #ff5a47;
+  --lp-purple: #5b3df0;
+  --lp-coral: #d9533c;
+  --lp-clay: #b8664a;
 
-  --lp-line: rgba(32, 29, 29, 0.1);
-  --lp-line-dark: rgba(244, 242, 240, 0.14);
+  --lp-line: rgba(26, 24, 23, 0.1);
+  --lp-line-soft: rgba(26, 24, 23, 0.06);
+  --lp-line-dark: rgba(244, 241, 236, 0.14);
 
   --lp-gutter: clamp(1.25rem, 4vw, 4rem);
   --lp-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -47,41 +54,47 @@
 /* ------------------------------------------------------------------ type -- */
 
 /*
- * Display type. 112px at -0.06em on the reference; clamp() carries that ratio
- * down to a phone instead of letting a 112px headline shatter the layout.
- */
-/*
- * No `text-wrap: balance` here. The hero's line breaks are authored by hand,
- * one clipped block per line, and balance re-broke them — it split
- * "Worth * paying." across two lines to even out a line that was already
- * exactly as intended.
+ * Display type is set in a serif, which is what separates a fashion page from
+ * a software page more than any other single choice. clamp() carries the
+ * poster ratio down to a phone instead of letting a 112px headline shatter the
+ * layout.
+ *
+ * No `text-wrap: balance` on the hero: its line breaks are authored by hand,
+ * one clipped block per line, and balance re-broke them.
  */
 .lp-display {
-  font-size: clamp(2.75rem, 10.5vw, 7rem);
-  line-height: 0.95;
+  font-size: clamp(2.75rem, 9.6vw, 6.75rem);
+  line-height: 0.94;
   letter-spacing: -0.055em;
-  font-weight: 400;
+  font-weight: 450;
   margin: 0;
 }
 
 .lp-display-sm {
   font-size: clamp(2rem, 5.2vw, 3.5rem);
-  line-height: 1.02;
-  letter-spacing: -0.04em;
-  font-weight: 400;
+  line-height: 1.03;
+  letter-spacing: -0.042em;
+  font-weight: 450;
   margin: 0;
   text-wrap: balance;
 }
 
 .lp-statement {
   font-size: clamp(1.4rem, 3.4vw, 2.6rem);
-  line-height: 1.16;
-  letter-spacing: -0.03em;
+  line-height: 1.18;
+  letter-spacing: -0.032em;
   font-weight: 400;
   margin: 0;
 }
 
-/* Small uppercase monospace labels — the reference's connective tissue. */
+/* The accent phrase inside a display line. Colour rather than italics: a
+   sans-serif italic at this size reads as a slant rather than as emphasis. */
+.lp-em {
+  font-style: normal;
+  color: var(--lp-clay);
+}
+
+/* Small uppercase monospace labels — the page's connective tissue. */
 .lp-label {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 0.6875rem;
@@ -95,6 +108,29 @@
   background: var(--lp-chip);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
+}
+
+/* The same idea one notch smaller, used inside the white mockups. */
+.lp-eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lp-ink-faint);
+}
+
+/*
+ * Where a mockup shows something the product cannot do yet, it says so in
+ * print. Quiet, but never hidden: a planned feature drawn as if it shipped is
+ * the one dishonesty a landing page cannot recover from.
+ */
+.lp-illustration {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lp-ink-faint);
 }
 
 /* Handwritten marginalia. Decorative by definition — always aria-hidden. */
@@ -114,20 +150,18 @@
  * The glyph set inside a display headline.
  *
  * Sized here rather than with a utility class: at this scale the difference
- * between "0.58em" and "whatever the SVG defaults to" is the difference
- * between punctuation and a full-screen graphic, and a stylesheet rule cannot
- * fail to be generated.
+ * between "0.5em" and "whatever the SVG defaults to" is the difference between
+ * punctuation and a full-screen graphic, and a stylesheet rule cannot fail to
+ * be generated.
  */
 .lp-hero-mark {
   display: inline-block;
-  width: 0.58em;
-  height: 0.58em;
+  width: 0.5em;
+  height: 0.5em;
   /* Sits in the text flow as punctuation. A flex wrapper turned it into a flex
      item that could wrap onto its own line, which is exactly what it did. */
   vertical-align: baseline;
-  /* The surrounding word-spaces now do the separating; this is just optical
-     correction so the glyph is not crowded by the descender of the "y". */
-  margin-inline: -0.04em;
+  margin-inline: -0.02em;
   translate: 0 -0.02em;
 }
 
@@ -141,7 +175,7 @@
 }
 
 .lp-dark .lp-token {
-  background: rgba(244, 242, 240, 0.12);
+  background: rgba(244, 241, 236, 0.12);
 }
 
 /* ---------------------------------------------------------------- layout -- */
@@ -161,24 +195,28 @@
 }
 
 /*
- * The faint vertical rules running the height of the page. Purely optical —
+ * The faint vertical rules running the height of the hero. Purely optical —
  * they give the composition a measured, drafting-table feel. Drawn with a
- * gradient on a pseudo-element so they cost no markup.
+ * gradient so they cost no markup.
  */
 .lp-rules {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background-image: linear-gradient(to right, var(--lp-line) 1px, transparent 1px);
+  background-image: linear-gradient(to right, var(--lp-line-soft) 1px, transparent 1px);
   background-size: calc(100% / 3) 100%;
   background-position: center;
-  opacity: 0.7;
 }
 
 .lp-section {
   position: relative;
   padding-block: clamp(4.5rem, 11vw, 9.5rem);
+}
+
+/* Hairline between two sections sharing the ivory ground. */
+.lp-section-divide {
+  border-top: 1px solid var(--lp-line-soft);
 }
 
 .lp-dark {
@@ -191,7 +229,24 @@
 }
 
 .lp-dark .lp-label-chip {
-  background: rgba(244, 242, 240, 0.1);
+  background: rgba(244, 241, 236, 0.1);
+}
+
+/* Section headers: eyebrow, headline, standfirst. */
+.lp-head {
+  max-width: 44rem;
+}
+
+.lp-standfirst {
+  margin-top: 1.25rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--lp-ink-muted);
+  max-width: 34rem;
+}
+
+.lp-dark .lp-standfirst {
+  color: var(--lp-on-dark-muted);
 }
 
 /* ------------------------------------------------------------------- nav -- */
@@ -202,7 +257,7 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 70;
-  width: min(42rem, calc(100vw - 1.5rem));
+  width: min(44rem, calc(100vw - 1.5rem));
 }
 
 .lp-nav-pill {
@@ -213,7 +268,8 @@
   height: 3.5rem;
   padding: 0.4rem 0.4rem 0.4rem 1.1rem;
   border-radius: 999px;
-  background: var(--lp-dark);
+  background: rgba(22, 20, 19, 0.92);
+  backdrop-filter: blur(14px);
   color: var(--lp-on-dark);
   box-shadow: 0 10px 40px -18px rgba(0, 0, 0, 0.6);
 }
@@ -275,21 +331,21 @@
 }
 
 .lp-nav-ghost {
-  background: rgba(244, 242, 240, 0.12);
+  background: rgba(244, 241, 236, 0.12);
   color: var(--lp-on-dark);
 }
 
 .lp-nav-ghost:hover {
-  background: rgba(244, 242, 240, 0.2);
+  background: rgba(244, 241, 236, 0.2);
 }
 
 .lp-nav-cta {
-  background: var(--lp-lime);
-  color: #12240a;
+  background: var(--lp-on-dark);
+  color: var(--lp-dark);
 }
 
 .lp-nav-cta:hover {
-  background: #b4ff82;
+  background: #ffffff;
 }
 
 /*
@@ -370,7 +426,7 @@
 .lp-menu a {
   display: block;
   font-size: clamp(2rem, 8vw, 4rem);
-  line-height: 1.1;
+  line-height: 1.12;
   letter-spacing: -0.04em;
   padding-block: 0.35rem;
   transition: color 0.25s var(--lp-ease);
@@ -418,6 +474,326 @@
   animation-duration: 55s;
 }
 
+/* -------------------------------------------------------------- garments -- */
+
+/*
+ * A garment tile: line art on a tinted ground.
+ *
+ * The drawing is a single stroke colour mixed from the tile tone so every tile
+ * is tonal rather than outlined in black, which is what makes a grid of ten of
+ * them read as a wardrobe instead of a set of icons.
+ */
+.lp-garment {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 8%, rgba(255, 255, 255, 0.75), transparent 62%),
+    var(--tile, #e8e5df);
+  color: rgba(26, 24, 23, 0.5);
+}
+
+.lp-garment-art {
+  position: absolute;
+  inset: 11%;
+  width: 78%;
+  height: 78%;
+}
+
+.lp-garment-sm {
+  width: 2.75rem;
+  flex: none;
+  border-radius: 0.375rem;
+}
+
+.lp-garment-tall {
+  aspect-ratio: 4 / 5;
+  border-radius: 0;
+}
+
+/* ----------------------------------------------------------- app mockups -- */
+
+/*
+ * The frame every product mockup sits in. White inside, because the product is
+ * white; the shadow is what lifts it off the ivory ground.
+ */
+.lp-panel {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: var(--lp-paper);
+  color: var(--lp-ink);
+  border: 1px solid rgba(26, 24, 23, 0.07);
+  box-shadow:
+    0 2px 4px -2px rgba(26, 24, 23, 0.08),
+    0 40px 90px -45px rgba(26, 24, 23, 0.45);
+}
+
+.lp-dark .lp-panel {
+  border-color: transparent;
+  box-shadow: 0 50px 120px -40px rgba(0, 0, 0, 0.65);
+}
+
+.lp-panel-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid #ece8e2;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+}
+
+.lp-panel-bar > span:first-child {
+  white-space: nowrap;
+}
+
+.lp-panel-dim {
+  color: var(--lp-ink-muted);
+  font-size: 0.8125rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * On a phone the bar has room for the panel's name and its one action, and
+ * nothing else. The secondary line is context, so it is the part that goes.
+ */
+@media (max-width: 26rem) {
+  .lp-panel-dim {
+    display: none;
+  }
+}
+
+.lp-panel-pill {
+  margin-left: auto;
+  flex: none;
+  border-radius: 0.5rem;
+  border: 1px solid #e0dbd3;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.lp-panel-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  border-top: 1px solid #ece8e2;
+  background: #faf9f7;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.75rem;
+  color: var(--lp-ink-muted);
+}
+
+/* A single wardrobe item: tile, name, category. */
+.lp-item-card {
+  min-width: 0;
+}
+
+.lp-item-name {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.lp-item-meta {
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  color: var(--lp-ink-faint);
+}
+
+/* The reasoning panel beside a generated look. */
+.lp-why {
+  border-radius: 1rem;
+  background: #faf9f7;
+  border: 1px solid #ece8e2;
+  padding: 1.25rem;
+}
+
+.lp-chip {
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e4dfd8;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Inert buttons inside the mockups. Never real controls. */
+.lp-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid #e0dbd3;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.lp-mini-btn-ink {
+  background: var(--lp-ink);
+  border-color: var(--lp-ink);
+  color: #ffffff;
+}
+
+.lp-saved,
+.lp-suggest {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.875rem;
+  border: 1px solid #ece8e2;
+  padding: 0.65rem 0.75rem;
+}
+
+/* ---------------------------------------------------------------- brands -- */
+
+.lp-brand {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--lp-paper);
+  border: 1px solid rgba(26, 24, 23, 0.07);
+  transition:
+    transform 0.4s var(--lp-ease),
+    box-shadow 0.4s var(--lp-ease);
+}
+
+.lp-brand:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px -35px rgba(26, 24, 23, 0.45);
+}
+
+.lp-brand-art {
+  position: relative;
+}
+
+.lp-brand-note {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  border-radius: 999px;
+  background: rgba(22, 20, 19, 0.88);
+  color: var(--lp-on-dark);
+  padding: 0.25rem 0.6rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lp-swatch {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(26, 24, 23, 0.08);
+}
+
+.lp-brand-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.lp-brand-body .lp-illustration {
+  margin-top: auto;
+}
+
+/* -------------------------------------------------------------- stylists -- */
+
+.lp-stylist {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  border-radius: 1rem;
+  background: var(--lp-paper);
+  border: 1px solid rgba(26, 24, 23, 0.07);
+  padding: 1rem 1.1rem;
+}
+
+.lp-stylist-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: var(--lp-chip);
+  color: var(--lp-ink-faint);
+}
+
+.lp-stylist-avatar svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.lp-booking {
+  border-radius: 1.25rem;
+  background: var(--lp-paper);
+  border: 1px solid rgba(26, 24, 23, 0.07);
+  padding: 1.5rem;
+  box-shadow: 0 30px 70px -45px rgba(26, 24, 23, 0.4);
+}
+
+.lp-slot {
+  border-radius: 0.625rem;
+  border: 1px solid #ece8e2;
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+}
+
+.lp-slot-on {
+  background: var(--lp-ink);
+  border-color: var(--lp-ink);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------- journey -- */
+
+.lp-journey {
+  display: grid;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 48rem) {
+  .lp-journey {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.lp-journey-step {
+  position: relative;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--lp-line-dark);
+}
+
+/* The dot sits on the rule, so the five steps read as one line of travel. */
+.lp-journey-dot {
+  position: absolute;
+  top: -3.5px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--lp-lime);
+}
+
 /* ----------------------------------------------------------------- cards -- */
 
 /*
@@ -426,8 +802,7 @@
  * Each card is absolutely placed on a shared origin and rotated outward, so the
  * whole fan pivots by animating one container. `--i` is the card's offset from
  * centre; `--spread` the degrees between neighbours.
- */
-/*
+ *
  * Height crops the fan deliberately: the cards run off the bottom of the
  * section the way a spread hand runs off a table, which is what makes the arc
  * read as part of something larger rather than a row of thumbnails.
@@ -474,10 +849,10 @@
 }
 
 .lp-arc-inner {
-  background: var(--lp-dark);
+  background: var(--lp-paper);
   border-radius: 0.9rem;
   padding: 0.5rem 0.5rem 0;
-  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 60px -32px rgba(26, 24, 23, 0.5);
   transition:
     transform 0.4s var(--lp-ease),
     box-shadow 0.4s var(--lp-ease);
@@ -485,15 +860,13 @@
 
 .lp-arc-card:hover .lp-arc-inner {
   transform: translateY(-18px);
-  box-shadow: 0 34px 70px -28px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 34px 70px -28px rgba(26, 24, 23, 0.55);
 }
 
+/* Applied to a garment tile, so it only has to change the proportion. */
 .lp-arc-shot {
-  position: relative;
   aspect-ratio: 4 / 5;
   border-radius: 0.55rem;
-  overflow: hidden;
-  background: #262222;
 }
 
 .lp-arc-caption {
@@ -502,7 +875,6 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.55rem 0.35rem 0.7rem;
-  color: var(--lp-on-dark);
   font-size: 0.75rem;
   letter-spacing: -0.01em;
 }
@@ -596,31 +968,34 @@
     transform 0.25s var(--lp-ease);
 }
 
-.lp-btn-lime {
-  background: var(--lp-lime);
-  color: #12240a;
-}
-
-.lp-btn-lime:hover {
-  background: #b4ff82;
-}
-
-.lp-btn-dark {
-  background: var(--lp-dark);
+/* Primary action. Ink on ivory, ivory on ink — the quiet, expensive-looking
+   pairing. Lime stays on the ticker, where it is punctuation rather than a
+   button shouting over a serif headline. */
+.lp-btn-ink {
+  background: var(--lp-ink);
   color: var(--lp-on-dark);
 }
 
-.lp-btn-dark:hover {
-  background: #2b2626;
+.lp-btn-ink:hover {
+  background: #332e2b;
+}
+
+.lp-btn-paper {
+  background: var(--lp-on-dark);
+  color: var(--lp-dark);
+}
+
+.lp-btn-paper:hover {
+  background: #ffffff;
 }
 
 .lp-btn-outline {
-  border: 1px solid var(--lp-line);
+  border: 1px solid rgba(26, 24, 23, 0.18);
   color: var(--lp-ink);
 }
 
 .lp-btn-outline:hover {
-  background: rgba(32, 29, 29, 0.05);
+  background: rgba(26, 24, 23, 0.05);
 }
 
 .lp-dark .lp-btn-outline {
@@ -629,7 +1004,7 @@
 }
 
 .lp-dark .lp-btn-outline:hover {
-  background: rgba(244, 242, 240, 0.08);
+  background: rgba(244, 241, 236, 0.08);
 }
 
 /* Magnetic offset, written by script; the transition smooths the return. */
@@ -697,16 +1072,16 @@
 
 /* ------------------------------------------------------------------ misc -- */
 
-/* Dashed orbit ring behind the centrepiece media. */
+/* Dashed orbit ring behind a centrepiece. */
 .lp-orbit {
   position: absolute;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  width: min(42rem, 88vw);
+  width: min(42rem, 74vw);
   aspect-ratio: 1;
   border-radius: 999px;
-  border: 1.5px dashed rgba(32, 29, 29, 0.16);
+  border: 1.5px dashed rgba(26, 24, 23, 0.14);
   animation: lp-spin 70s linear infinite;
   pointer-events: none;
 }
@@ -717,7 +1092,6 @@
   }
 }
 
-/* Oversized ghost words that the centrepiece sits on top of. */
 /*
  * Oversized words the centrepiece sits on top of. Sized to peek out from
  * behind the card rather than run under the page edge — a ghost word clipped
@@ -728,7 +1102,7 @@
   line-height: 1;
   letter-spacing: -0.05em;
   font-weight: 400;
-  color: rgba(32, 29, 29, 0.08);
+  color: rgba(26, 24, 23, 0.08);
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
@@ -764,8 +1138,13 @@
     transition: none;
   }
 
-  .lp-arc-stage {
+  .lp-arc-stage,
+  .lp-brand {
     transition: none;
+  }
+
+  .lp-brand:hover {
+    transform: none;
   }
 
   .lp-cursor {
