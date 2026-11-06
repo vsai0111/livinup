@@ -1,5 +1,5 @@
 import { GarmentTile } from './GarmentTile'
-import { WARDROBE_ITEMS } from './showcase-data'
+import { ARC_ITEMS } from './showcase-data'
 
 /**
  * The fan of wardrobe cards beneath the hero.
@@ -14,7 +14,7 @@ import { WARDROBE_ITEMS } from './showcase-data'
  * So it is hidden from assistive technology rather than described.
  */
 export function HeroArc() {
-  const cards = WARDROBE_ITEMS.slice(0, 7)
+  const cards = ARC_ITEMS
   const middle = (cards.length - 1) / 2
 
   return (

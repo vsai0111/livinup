@@ -11,11 +11,10 @@
  * keeping them separate is what stops the interface from looking busy:
  *
  *   primary — actions. Near-black. Buttons, the things you click.
- *   accent  — signal. Green. "this matched you", "this price is good".
+ *   accent  — signal. Green. Active navigation, verified badges, success.
  *
  * A green primary button would put the action colour and the meaning colour in
- * competition, and every screen would read as if something were being sold. Ink
- * for verbs, green for facts.
+ * competition. Ink for verbs, green for facts.
  */
 
 @theme {
@@ -39,18 +38,11 @@
   --color-primary-strong: #000000;
   --color-primary-ink: #ffffff;
 
-  /* Signal. Used sparingly: active nav, matches, positive price movement. */
+  /* Signal. Used sparingly: active nav, verified badges, success states. */
   --color-accent: #2f6b4a;
   --color-accent-strong: #24543a;
   --color-accent-soft: #eef4f0;
   --color-accent-ink: #ffffff;
-
-  /* Deal bands. Information, not a shout. */
-  --color-deal-excellent: #1c6b45;
-  --color-deal-great: #2b7a58;
-  --color-deal-good: #5a7040;
-  --color-deal-fair: #7a6a3c;
-  --color-deal-poor: #7a5c50;
 
   --color-positive: #1c6b45;
   --color-negative: #a03f34;
@@ -125,38 +117,6 @@
   /* In-page anchors on the landing page must clear the sticky navbar. */
   :target {
     scroll-margin-top: 6rem;
-  }
-}
-
-@layer components {
-  /*
-   * Search filters: a disclosure on small screens, permanently open from lg.
-   *
-   * `<details open>` cannot vary by breakpoint — the attribute is either there
-   * or it is not — so the element ships closed (the right default on a phone)
-   * and desktop forces it open in CSS.
-   *
-   * Both rules are needed for that. Browsers used to hide the children of a
-   * closed <details> with `display: none`, which the second rule overrides;
-   * current ones hide the `::details-content` pseudo-element with
-   * `content-visibility` instead, which only the first rule reaches. Ship both
-   * and the panel is open on desktop either way.
-   */
-  @media (min-width: 64rem) {
-    .filters-disclosure > summary {
-      display: none;
-    }
-
-    .filters-disclosure::details-content {
-      content-visibility: visible;
-      block-size: auto;
-    }
-
-    .filters-disclosure > :not(summary) {
-      display: block;
-      /* The panel's top border belongs to the summary that is now hidden. */
-      border-top-width: 0;
-    }
   }
 }
 

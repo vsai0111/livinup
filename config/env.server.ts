@@ -7,8 +7,13 @@ import { logger } from '@/lib/logging/logger'
  * never crashes a build that does not actually touch the database.
  *
  * `server-only` makes it a build error to import this from a Client Component,
- * which is the guardrail that keeps the service-role key out of the browser.
+ * which is the guardrail that keeps `SUPABASE_SECRET_KEY` out of the browser.
  */
+const flag = z
+  .enum(['1', '0', 'true', 'false', ''])
+  .optional()
+  .transform((value) => value === '1' || value === 'true')
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
@@ -18,33 +23,32 @@ const schema = z.object({
 
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional().or(z.literal('')),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional().or(z.literal('')),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional().or(z.literal('')),
+  /**
+   * Server-only Supabase secret key, used ONLY by lib/media/supabase-store.ts
+   * for Storage API calls. Never prefix it NEXT_PUBLIC_. See product-spec 7.3.
+   */
+  SUPABASE_SECRET_KEY: z.string().optional().or(z.literal('')),
 
   LIVINUP_AUTH_SECRET: z.string().optional().or(z.literal('')),
 
-  SENTRY_DSN: z.string().optional().or(z.literal('')),
-  LIVINUP_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  /** Where uploaded images live: `auto` = Supabase when configured, else local disk. */
+  LIVINUP_MEDIA_DRIVER: z.enum(['auto', 'local', 'supabase']).default('auto'),
+  MEDIA_LOCAL_DIR: z.string().default('.livinup/media'),
 
-  // --- Product ingestion ---------------------------------------------------
-  // All optional. A provider whose credentials are absent reports itself as
-  // not ready and is skipped; that is the normal state of an integration still
-  // waiting on account approval, not a configuration error.
-  INGESTION_CRON_SECRET: z.string().optional().or(z.literal('')),
-
-  FLIPKART_AFFILIATE_TRACKING_ID: z.string().optional().or(z.literal('')),
-  FLIPKART_AFFILIATE_TOKEN: z.string().optional().or(z.literal('')),
-  /** Comma-separated Flipkart feed category ids, from the affiliate listing endpoint. */
-  FLIPKART_FEED_CATEGORIES: z.string().optional().or(z.literal('')),
+  /** Require an invite code at sign-up (closed beta). */
+  LIVINUP_REQUIRE_INVITE: flag,
 
   /**
-   * Admitad advertiser feeds, `;`-separated:
-   *   slug|Display Name|https://store.example|host1,host2|https://feed-url
+   * Show "Continue with Google". Only set this once the Google provider is
+   * enabled in the Supabase dashboard; otherwise the button leads to an error.
    */
-  ADMITAD_FEEDS: z.string().optional().or(z.literal('')),
+  LIVINUP_GOOGLE_AUTH: flag,
 
-  CUELINKS_API_KEY: z.string().optional().or(z.literal('')),
-  /** Cuelinks link-conversion endpoint. Confirm against the account's API reference. */
-  CUELINKS_CONVERT_URL: z.string().url().optional().or(z.literal('')),
+  /** Shared secret for the scheduled cleanup endpoint (`/api/cron/cleanup`). */
+  CRON_SECRET: z.string().optional().or(z.literal('')),
+
+  SENTRY_DSN: z.string().optional().or(z.literal('')),
+  LIVINUP_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 })
 
 export type ServerEnv = z.infer<typeof schema>
@@ -123,4 +127,16 @@ export function resolveDbDriver(): 'postgres' | 'pglite' {
 export function supabaseAuthConfigured(): boolean {
   const env = serverEnv()
   return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+}
+
+/** True when the Google sign-in button should be offered. */
+export function googleAuthEnabled(): boolean {
+  return supabaseAuthConfigured() && serverEnv().LIVINUP_GOOGLE_AUTH
+}
+
+/** Which image store to use, after resolving `auto`. */
+export function resolveMediaDriver(): 'local' | 'supabase' {
+  const env = serverEnv()
+  if (env.LIVINUP_MEDIA_DRIVER !== 'auto') return env.LIVINUP_MEDIA_DRIVER
+  return env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SECRET_KEY ? 'supabase' : 'local'
 }

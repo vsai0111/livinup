@@ -11,11 +11,18 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
   timeout: 60_000,
+  // Hard ceiling for the whole run, so a hung server or browser cannot hold a
+  // CI job (or a terminal) open indefinitely.
+  globalTimeout: 20 * 60_000,
   expect: { timeout: 15_000 },
   use: {
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // A stuck click or page load fails within seconds and names the step,
+    // instead of silently consuming the whole test budget.
+    actionTimeout: 20_000,
+    navigationTimeout: 60_000,
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

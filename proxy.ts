@@ -22,12 +22,14 @@ const SESSION_COOKIES = ['livinup_session', 'sb-access-token']
 /** Paths that require a session. Everything else is public. */
 const PROTECTED_PREFIXES = [
   '/home',
-  '/search',
-  '/saved',
-  '/preferences',
+  '/wardrobe',
+  '/outfits',
+  '/create',
+  '/notifications',
+  '/settings',
   '/profile',
+  '/admin',
   '/onboarding',
-  '/product',
 ]
 
 function hasSessionCookie(request: NextRequest): boolean {
@@ -166,10 +168,10 @@ async function refreshSupabaseSession(request: NextRequest): Promise<NextRespons
 
 export const config = {
   /*
-   * Everything except static assets, the image optimizer, and the merchant
-   * click-out route (which handles its own anonymous case).
+   * Everything except static assets, the image optimizer, the media route
+   * (which checks access itself, per image) and the cron endpoint.
    */
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/product-image|go/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|media/|api/cron/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }

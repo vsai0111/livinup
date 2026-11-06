@@ -20,7 +20,7 @@ import { createTestDb, type TestDb } from '../helpers/db'
 let ctx: TestDb
 
 beforeAll(async () => {
-  ctx = await createTestDb({ seed: false })
+  ctx = await createTestDb()
 })
 
 afterAll(async () => {

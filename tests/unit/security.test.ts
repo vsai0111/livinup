@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  hostMatches,
-  isSafeHttpUrl,
-  parseUrl,
-  safeInternalPath,
-  validateRedirectTarget,
-} from '@/lib/utils/url'
-import { normalizeProduct } from '@/services/normalization/normalize'
+import { displayHost, isSafeHttpUrl, parseUrl, safeInternalPath } from '@/lib/utils/url'
 import { createSessionToken, readSessionToken } from '@/lib/auth/session'
 import { checkPasswordPolicy, hashPassword, verifyPassword } from '@/lib/auth/password'
 
@@ -39,34 +32,14 @@ describe('URL safety', () => {
     expect(isSafeHttpUrl('java\nscript:alert(1)')).toBe(false)
   })
 
-  it('anchors host matching on a dot boundary', () => {
-    expect(hostMatches('example.com', 'example.com')).toBe(true)
-    expect(hostMatches('shop.example.com', 'example.com')).toBe(true)
-
-    // The attack this prevents: registering evil-example.com to satisfy an
-    // allowlist entry of example.com.
-    expect(hostMatches('evil-example.com', 'example.com')).toBe(false)
-    expect(hostMatches('example.com.evil.net', 'example.com')).toBe(false)
-    expect(hostMatches('notexample.com', 'example.com')).toBe(false)
-  })
-
-  it('validates redirect targets against the merchant allowlist', () => {
-    const allowed = ['shop.example.com']
-
-    expect(validateRedirectTarget('https://shop.example.com/p/1', allowed)).not.toBeNull()
-    expect(validateRedirectTarget('https://cdn.shop.example.com/p/1', allowed)).not.toBeNull()
-
-    expect(validateRedirectTarget('https://evil.test/p/1', allowed)).toBeNull()
-    expect(validateRedirectTarget('https://shop.example.com.evil.test', allowed)).toBeNull()
-    expect(validateRedirectTarget('javascript:alert(1)', allowed)).toBeNull()
-
-    // An empty allowlist must deny everything, not allow everything.
-    expect(validateRedirectTarget('https://shop.example.com', [])).toBeNull()
+  it('shows a brand website as a bare host', () => {
+    expect(displayHost('https://www.brand.in/')).toBe('brand.in')
+    expect(displayHost('not a url')).toBe('not a url')
   })
 
   it('keeps internal redirect paths on-origin', () => {
     expect(safeInternalPath('/home')).toBe('/home')
-    expect(safeInternalPath('/search?q=linen')).toBe('/search?q=linen')
+    expect(safeInternalPath('/wardrobe?group=top')).toBe('/wardrobe?group=top')
 
     expect(safeInternalPath('//evil.com')).toBe('/')
     expect(safeInternalPath('/\\evil.com')).toBe('/')
@@ -79,108 +52,6 @@ describe('URL safety', () => {
   it('parses without throwing on rubbish', () => {
     expect(parseUrl('not a url')).toBeNull()
     expect(parseUrl({})).toBeNull()
-  })
-})
-
-describe('normalization rejects hostile merchant data', () => {
-  const base = {
-    externalId: 'X1',
-    title: 'Aera Linen Shirt',
-    brand: 'Aera',
-    category: 'clothing',
-    price: 50,
-  }
-
-  it('refuses a product whose URL is a script scheme', () => {
-    const result = normalizeProduct({ ...base, productUrl: 'javascript:alert(1)' })
-    expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.errors.join(' ')).toMatch(/productUrl/)
-  })
-
-  it('drops unsafe image URLs but keeps the product', () => {
-    const result = normalizeProduct({
-      ...base,
-      productUrl: 'https://example.test/p/1',
-      images: ['javascript:alert(1)', 'https://cdn.example.test/a.jpg'],
-    })
-
-    expect(result.ok).toBe(true)
-    if (result.ok) {
-      expect(result.value.images).toEqual(['https://cdn.example.test/a.jpg'])
-      expect(result.warnings.join(' ')).toMatch(/unsafe image/)
-    }
-  })
-
-  it('refuses a product with no brand rather than guessing one', () => {
-    const result = normalizeProduct({
-      externalId: 'X1',
-      title: 'Some Shirt',
-      category: 'clothing',
-      price: 50,
-      productUrl: 'https://example.test/p/1',
-    })
-    expect(result.ok).toBe(false)
-  })
-
-  it('refuses an unusable price rather than defaulting it to zero', () => {
-    const result = normalizeProduct({
-      ...base,
-      price: 'call for price',
-      productUrl: 'https://example.test/p/1',
-    })
-    expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.errors.join(' ')).toMatch(/price/)
-  })
-
-  it('discards a fake original price that would imply a discount', () => {
-    const result = normalizeProduct({
-      ...base,
-      price: 50,
-      originalPrice: 40, // lower than current: not a discount, bad data
-      productUrl: 'https://example.test/p/1',
-    })
-
-    expect(result.ok).toBe(true)
-    if (result.ok) {
-      expect(result.value.listing.originalPrice).toBeNull()
-      expect(result.value.listing.discountFraction).toBeNull()
-    }
-  })
-
-  it('normalises a messy but legitimate listing', () => {
-    const result = normalizeProduct({
-      externalId: 'MG-1',
-      title: 'NEW! Aera Boxy Cotton Tee - Olive - M',
-      brand: 'Aera',
-      category: 'Women > Clothing',
-      subcategory: 't-shirts',
-      price: '$42.00',
-      originalPrice: '60.00',
-      availability: 'In Stock',
-      productUrl: 'https://example.test/p/1',
-      attributes: { Colour: 'Olive', Fabric: 'organic cotton', fit: 'boxy' },
-    })
-
-    expect(result.ok).toBe(true)
-    if (result.ok) {
-      expect(result.value.category).toBe('clothing')
-      expect(result.value.attributes.color).toBe('olive')
-      expect(result.value.attributes.material).toBe('cotton')
-      expect(result.value.attributes.fit).toBe('boxy')
-      expect(result.value.listing.currentPrice).toBe(42)
-      expect(result.value.listing.originalPrice).toBe(60)
-      expect(result.value.listing.availability).toBe('in_stock')
-    }
-  })
-
-  it('treats unrecognised availability as out of stock, not in stock', () => {
-    const result = normalizeProduct({
-      ...base,
-      availability: 'who knows',
-      productUrl: 'https://example.test/p/1',
-    })
-    expect(result.ok).toBe(true)
-    if (result.ok) expect(result.value.listing.availability).toBe('out_of_stock')
   })
 })
 

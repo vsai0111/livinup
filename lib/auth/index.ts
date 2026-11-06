@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { supabaseAuthConfigured } from '@/config/env.server'
 import { getDb } from '@/lib/db'
 import type { Db } from '@/lib/db/types'
+import { profileFromRow, PROFILE_COLUMNS, type ProfileRow } from '@/lib/profiles/rows'
 import type { AuthUser, Profile, SessionUser } from '@/types/user'
 import { LocalAuthProvider } from './local-provider'
 import { SupabaseAuthProvider } from './supabase-provider'
@@ -24,7 +25,7 @@ export function getAuthProvider(): AuthProvider {
 /**
  * The authenticated user for this request, or null.
  *
- * Wrapped in React's `cache` so that a page rendering several Server Components
+ * Wrapped in React's `cache` so a page rendering several Server Components
  * verifies the session once per request rather than once per component.
  */
 export const getCurrentUser = cache(async () => {
@@ -32,61 +33,44 @@ export const getCurrentUser = cache(async () => {
 })
 
 /**
- * The user together with their LivinUp profile, creating the profile on first
- * sight.
+ * The user together with their profile, creating the profile on first sight.
  *
- * Profile creation is idempotent (`on conflict do nothing`) and lazy rather
- * than a database trigger, which keeps it working identically under both auth
- * providers.
+ * An account being deleted is treated as signed out everywhere: it must not be
+ * usable while its data is being removed.
  */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const user = await getCurrentUser()
   if (!user) return null
 
   const db = await getDb()
-  return { ...user, profile: await ensureProfile(db, user) }
+  const profile = await ensureProfile(db, user)
+  if (profile.status === 'deleting') return null
+  return { ...user, profile }
 })
 
 /**
  * Create this user's profile row if it does not exist, and return it.
  *
- * Idempotent, and the single place a profile comes into being. It has to be
- * callable outside a rendered session because `user_events.user_id` references
- * `profiles (id)`: anything recording an event for a freshly authenticated user
- * — signup and first sign-in both do — must provision the profile first, or the
- * insert dies on `user_events_user_id_fkey`. `recordEvent` swallows that error
- * by design, so the symptom is a silently missing funnel row rather than a
- * visible failure.
+ * Idempotent, and the single place a profile comes into being. Lazy rather than
+ * a database trigger, so it works identically under both auth providers.
  */
 export async function ensureProfile(db: Db, user: AuthUser): Promise<Profile> {
-  const rows = await db.query<{
-    id: string
-    display_name: string
-    onboarding_completed: boolean
-    created_at: string
-  }>(
+  const rows = await db.query<ProfileRow>(
     `insert into profiles (id, display_name)
      values ($1, $2)
      on conflict (id) do update set id = profiles.id
-     returning id, display_name, onboarding_completed, created_at`,
+     returning ${PROFILE_COLUMNS}`,
     [user.id, defaultDisplayName(user.email)],
   )
-
-  const row = rows[0]
-  return {
-    id: row.id,
-    displayName: row.display_name,
-    onboardingCompleted: row.onboarding_completed,
-    createdAt: String(row.created_at),
-  }
+  return profileFromRow(rows[0])
 }
 
 /**
  * Require an authenticated user, redirecting to sign-in when there is none.
  *
- * Every page under app/(app) calls this. It is the authorisation boundary —
- * middleware only redirects for a better user experience and is not relied on
- * for access control.
+ * Every signed-in page calls this. It is the authorisation boundary; the proxy
+ * only redirects for a better experience and is not relied on for access
+ * control.
  */
 export async function requireUser(returnTo?: string): Promise<SessionUser> {
   const session = await getSessionUser()
@@ -97,11 +81,31 @@ export async function requireUser(returnTo?: string): Promise<SessionUser> {
   return session
 }
 
+/**
+ * Require a user who has finished onboarding (and so has a username).
+ * Sends everyone else to onboarding first.
+ */
+export async function requireOnboardedUser(returnTo?: string): Promise<SessionUser> {
+  const session = await requireUser(returnTo)
+  if (!session.profile.username) redirect('/onboarding')
+  return session
+}
+
+/** Require an admin. Everyone else gets a plain 404, not a hint that admin exists. */
+export async function requireAdmin(): Promise<SessionUser> {
+  const session = await requireOnboardedUser('/admin')
+  if (session.profile.role !== 'admin') {
+    const { notFound } = await import('next/navigation')
+    notFound()
+  }
+  return session
+}
+
 /** A friendly initial display name derived from the email local part. */
 function defaultDisplayName(email: string): string {
   const local = email.split('@')[0] ?? 'there'
-  const cleaned = local.replace(/[._-]+/g, ' ').trim()
-  if (!cleaned) return 'there'
+  const cleaned = local.replace(/[._\-+0-9]+/g, ' ').trim()
+  if (!cleaned) return 'New member'
   return cleaned
     .split(' ')
     .filter(Boolean)

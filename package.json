@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "node scripts/dev-local.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -16,10 +17,9 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "db:migrate": "tsx --conditions=react-server scripts/db-migrate.ts",
-    "db:seed": "tsx --conditions=react-server scripts/db-seed.ts",
     "db:reset": "tsx --conditions=react-server scripts/db-reset.ts",
-    "db:setup": "npm run db:migrate && npm run db:seed",
-    "ingest": "tsx --conditions=react-server scripts/ingest.ts",
+    "db:backup": "tsx --conditions=react-server scripts/db-backup.ts",
+    "admin:grant": "tsx --conditions=react-server scripts/admin-grant.ts",
     "verify": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
+    "sharp": "0.35.4",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.5.4"
   },

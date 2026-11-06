@@ -26,6 +26,11 @@ interface SessionPayload {
   exp: number
 }
 
+/** The local provider's signing secret. Also keys password-reset tokens. */
+export function sessionSecret(): string {
+  return secret()
+}
+
 function secret(): string {
   const configured = serverEnv().LIVINUP_AUTH_SECRET
   if (configured && configured.length >= 16) return configured

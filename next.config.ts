@@ -18,11 +18,23 @@ const nextConfig: NextConfig = {
     '/**/*': ['./supabase/migrations/**/*.sql', './node_modules/@electric-sql/pglite/dist/**'],
   },
 
-  images: {
-    // Merchant image hosts are added here as real merchants are onboarded.
-    // Seeded catalogue images are local SVGs under /public and bypass the
-    // optimizer (see components/products/ProductImage.tsx).
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+  // Uploaded images are resized at upload time and served by /media/[id]/[size]
+  // with access checks, so the image optimizer is not used for user content and
+  // no remote hosts are allowed.
+  images: { remotePatterns: [] },
+
+  /*
+   * Shopping-era URLs (retired in v1, docs/product-spec.md D12). Old links and
+   * bookmarks land somewhere useful instead of a 404.
+   */
+  async redirects() {
+    return [
+      { source: '/search', destination: '/home', permanent: true },
+      { source: '/saved', destination: '/wardrobe', permanent: true },
+      { source: '/preferences', destination: '/settings', permanent: true },
+      { source: '/product/:id*', destination: '/home', permanent: true },
+      { source: '/go/:id*', destination: '/', permanent: true },
+    ]
   },
 
   async headers() {

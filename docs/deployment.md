@@ -70,7 +70,8 @@ be chosen deliberately. Every cold start on the embedded driver logs a warning.
 ## Applying migrations
 
 Migrations are plain SQL and are **not** applied automatically against a remote
-database. Either:
+database. Until `0007_wardrobe.sql` has been applied, `/wardrobe` shows a "not
+available yet" notice instead of the wardrobe. Either:
 
 ```bash
 DATABASE_URL="postgresql://..." LIVINUP_DB_DRIVER=postgres npm run db:migrate
@@ -91,6 +92,31 @@ Seeding is idempotent. Note that every seeded price observation is written with
 ```sql
 delete from price_history where source = 'seed';
 ```
+
+### Seed catalogues from before the switch to rupees
+
+The seed catalogue is priced in INR. A database seeded earlier holds the old
+USD seed listings, and re-seeding over them is wrong: listings would take the
+new rupee price while keeping their dollar price history, and every deal score
+would compare the two. Migration `0006` deliberately does not convert stored
+prices, because relabelling 49.99 USD as ₹49.99 would be a fabricated price.
+
+Remove the old seed rows first, then seed again. Only rows with
+`provider = 'seed'` are touched; real ingested listings are not:
+
+```sql
+begin;
+delete from merchant_products where provider = 'seed';
+delete from products p
+ where not exists (select 1 from merchant_products mp where mp.product_id = p.id);
+commit;
+```
+
+Price history, images and variants go with their listings, and saved products,
+likes and rejections pointing at deleted seed products are removed by their
+foreign keys. Event and affiliate-click rows are kept with their product
+reference set to null, so the funnel history survives. Back the database up
+before running this against anything that matters.
 
 ## Supabase configuration
 

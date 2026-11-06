@@ -60,4 +60,25 @@ export interface AuthProvider {
    * user id supplied by the client.
    */
   getUser(): Promise<AuthUser | null>
+
+  /**
+   * Start a password reset. Must behave identically whether or not the address
+   * has an account, so the form cannot be used to discover accounts.
+   *
+   * `redirectTo` is the absolute URL the emailed link should land on.
+   */
+  requestPasswordReset(input: { email: string; redirectTo: string }): Promise<void>
+
+  /**
+   * Set a new password. `token` is the local provider's reset token; the
+   * Supabase provider instead uses the recovery session the emailed link
+   * established.
+   */
+  resetPassword(input: { password: string; token?: string }): Promise<AuthResult>
+
+  /** Change the password of the signed-in user, after re-checking the current one. */
+  changePassword(input: { current: string; next: string }): Promise<AuthResult>
+
+  /** URL to send the browser to for Google sign-in, or null when unavailable. */
+  googleSignInUrl(redirectTo: string): Promise<string | null>
 }
