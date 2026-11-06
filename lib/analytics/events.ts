@@ -7,10 +7,8 @@ import type { EventType, UserEventInput } from '@/types/user'
  * Server-side event recording.
  *
  * LivinUp's own database is the source of truth for the product funnel, not a
- * third-party analytics tool. That matters for three reasons: the questions in
- * docs/analytics.md can be answered with SQL and no vendor account; the
- * behavioural learning loop reads the same events it writes; and the funnel
- * survives a change of analytics vendor.
+ * third-party analytics tool: the validation questions in docs/product-spec.md
+ * section 13 are answered with SQL on `user_events`.
  *
  * PostHog, when configured, is a *mirror* for exploration — never the record.
  */
@@ -21,6 +19,11 @@ const ANONYMOUS_ALLOWED: ReadonlySet<EventType> = new Set([
   'signup_started',
   'signup_completed',
   'signin_completed',
+  'profile_viewed',
+  'brand_profile_viewed',
+  'share_clicked',
+  // Recorded after the account is gone, so it cannot name it.
+  'account_deleted',
 ])
 
 /** Cap on metadata size, so an event row cannot be used as arbitrary storage. */
@@ -49,35 +52,24 @@ function sanitizeMetadata(metadata: Record<string, unknown> | undefined): Record
 /**
  * Record one event.
  *
- * Never throws. Analytics failing must not break the user's action — a failed
- * "product saved" event is a lost data point, whereas a thrown error is a
- * broken save button.
+ * Never throws. Analytics failing must not break the user's action — a lost
+ * data point is acceptable, a broken button is not.
  */
 export async function recordEvent(db: Db, input: UserEventInput): Promise<void> {
   try {
     if (!input.userId && !ANONYMOUS_ALLOWED.has(input.eventType)) return
 
     await db.query(
-      `insert into user_events
-         (user_id, session_id, event_type, product_id, merchant_product_id, metadata)
-       values ($1, $2, $3, $4, $5, $6::jsonb)`,
+      `insert into user_events (user_id, session_id, event_type, metadata)
+       values ($1, $2, $3, $4::jsonb)`,
       [
         input.userId ?? null,
         input.sessionId ?? null,
         input.eventType,
-        input.productId ?? null,
-        input.merchantProductId ?? null,
         JSON.stringify(sanitizeMetadata(input.metadata)),
       ],
     )
   } catch (error) {
     logger.warn('failed to record event', { eventType: input.eventType, error })
-  }
-}
-
-/** Record several events in one round trip. */
-export async function recordEvents(db: Db, inputs: readonly UserEventInput[]): Promise<void> {
-  for (const input of inputs) {
-    await recordEvent(db, input)
   }
 }

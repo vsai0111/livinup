@@ -7,14 +7,12 @@ import type { AuthProvider, AuthErrorCode, AuthResult } from './types'
  * Supabase Auth provider — the production path.
  *
  * Uses `@supabase/ssr` so the session lives in HttpOnly cookies managed by
- * Supabase and is verified server-side on every request. The publishable key is
- * the only key used here; no elevated Supabase API key is used by
- * request-handling code, or configured at all.
+ * Supabase and is verified server-side on every request. Only the publishable
+ * key is used here.
  *
- * NOT YET EXERCISED AGAINST A REAL PROJECT: no Supabase credentials have been
- * provisioned (see docs/development.md, "What I need from you"). The code path
- * is complete and type-checked, but it has not been run against a live Supabase
- * instance, so treat first-run issues as expected rather than surprising.
+ * Google sign-in additionally needs the Google provider enabled in the
+ * Supabase dashboard (Authentication → Providers); until it is,
+ * `googleSignInUrl` returns null and the UI says so.
  */
 export class SupabaseAuthProvider implements AuthProvider {
   readonly id = 'supabase' as const
@@ -122,5 +120,68 @@ export class SupabaseAuthProvider implements AuthProvider {
     const { data, error } = await supabase.auth.getUser()
     if (error || !data.user) return null
     return { id: data.user.id, email: data.user.email ?? '' }
+  }
+
+  async requestPasswordReset({ email, redirectTo }: { email: string; redirectTo: string }) {
+    const supabase = await this.client()
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })
+    // Logged, never surfaced: the caller shows the same message either way.
+    if (error)
+      logger.warn('supabase password reset failed', { code: error.code, status: error.status })
+  }
+
+  async resetPassword({ password }: { password: string }): Promise<AuthResult> {
+    const supabase = await this.client()
+    const { data: current } = await supabase.auth.getUser()
+    if (!current.user) {
+      return {
+        ok: false,
+        code: 'not_authenticated',
+        message: 'That reset link is not valid or has expired. Request a new one.',
+      }
+    }
+    const { data, error } = await supabase.auth.updateUser({ password })
+    if (error || !data.user)
+      return { ok: false, ...this.mapError(error?.message ?? '', error?.status) }
+    return { ok: true, user: { id: data.user.id, email: data.user.email ?? '' } }
+  }
+
+  async changePassword({ current, next }: { current: string; next: string }): Promise<AuthResult> {
+    const supabase = await this.client()
+    const { data: me } = await supabase.auth.getUser()
+    const email = me.user?.email
+    if (!email) {
+      return {
+        ok: false,
+        code: 'not_authenticated',
+        message: 'Password sign-in is not set up for this account.',
+      }
+    }
+    // Re-check the current password before changing it.
+    const check = await supabase.auth.signInWithPassword({ email, password: current })
+    if (check.error) {
+      return {
+        ok: false,
+        code: 'invalid_credentials',
+        message: 'Your current password is not correct.',
+      }
+    }
+    const { data, error } = await supabase.auth.updateUser({ password: next })
+    if (error || !data.user)
+      return { ok: false, ...this.mapError(error?.message ?? '', error?.status) }
+    return { ok: true, user: { id: data.user.id, email } }
+  }
+
+  async googleSignInUrl(redirectTo: string): Promise<string | null> {
+    const supabase = await this.client()
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    })
+    if (error || !data.url) {
+      logger.warn('google sign-in unavailable', { code: error?.code, status: error?.status })
+      return null
+    }
+    return data.url
   }
 }

@@ -11,7 +11,7 @@ import { logger } from '@/lib/logging/logger'
  * Migrations are plain `.sql` files applied in filename order and recorded in
  * `schema_migrations`. The checksum guards against a migration being edited
  * after it has been applied somewhere, which is the usual way schema drift
- * starts. The same files are what `supabase db push` applies in production.
+ * starts.
  */
 
 export const MIGRATIONS_DIR = path.join(process.cwd(), 'supabase', 'migrations')
@@ -24,7 +24,10 @@ export async function loadMigrations(dir = MIGRATIONS_DIR): Promise<Migration[]>
 
   return Promise.all(
     files.map(async (name) => {
-      const sql = await readFile(path.join(dir, name), 'utf8')
+      const raw = await readFile(path.join(dir, name), 'utf8')
+      // Normalise line endings before hashing, so a Windows checkout and a
+      // Linux CI runner agree on the checksum of the same migration.
+      const sql = raw.replace(/\r\n/g, '\n')
       return { name, sql, checksum: createHash('sha256').update(sql).digest('hex').slice(0, 16) }
     }),
   )
@@ -42,10 +45,29 @@ async function ensureMigrationsTable(db: Db): Promise<void> {
 
 export type MigrateResult = { applied: string[]; skipped: string[] }
 
-export async function migrate(db: Db, dir = MIGRATIONS_DIR): Promise<MigrateResult> {
+export interface MigrateOptions {
+  dir?: string
+  /**
+   * Stop after this migration (inclusive), e.g. `0007_community.sql`. Lets an
+   * additive change be applied before a destructive one that must wait for a
+   * deploy.
+   */
+  upTo?: string
+}
+
+export async function migrate(
+  db: Db,
+  options: MigrateOptions | string = {},
+): Promise<MigrateResult> {
+  const { dir = MIGRATIONS_DIR, upTo } = typeof options === 'string' ? { dir: options } : options
   await ensureMigrationsTable(db)
 
-  const migrations = await loadMigrations(dir)
+  const all = await loadMigrations(dir)
+  if (upTo && !all.some((m) => m.name === upTo)) {
+    throw new Error(`No migration named "${upTo}".`)
+  }
+  const migrations = upTo ? all.filter((m) => m.name <= upTo) : all
+
   const existing = await db.query<{ name: string; checksum: string }>(
     'select name, checksum from schema_migrations',
   )
@@ -57,7 +79,7 @@ export async function migrate(db: Db, dir = MIGRATIONS_DIR): Promise<MigrateResu
     const previous = applied.get(migration.name)
 
     if (previous) {
-      if (previous !== migration.checksum) {
+      if (previous !== migration.checksum && previous !== legacyChecksum(migration)) {
         throw new Error(
           `Migration "${migration.name}" changed after it was applied ` +
             `(recorded ${previous}, found ${migration.checksum}). ` +
@@ -83,10 +105,24 @@ export async function migrate(db: Db, dir = MIGRATIONS_DIR): Promise<MigrateResu
   return result
 }
 
+/**
+ * Checksum as recorded by the runner before line endings were normalised.
+ *
+ * Migrations applied from an LF checkout recorded the LF hash, which is what
+ * `checksum` is now. Ones applied from a CRLF checkout recorded the CRLF hash;
+ * accept that too, so normalising does not make history look edited.
+ */
+function legacyChecksum(migration: Migration): string {
+  return createHash('sha256')
+    .update(migration.sql.replace(/\n/g, '\r\n'))
+    .digest('hex')
+    .slice(0, 16)
+}
+
 /** True when the core schema is present. */
 export async function isMigrated(db: Db): Promise<boolean> {
   const rows = await db.query<{ present: boolean }>(
-    `select to_regclass('public.products') is not null as present`,
+    `select to_regclass('public.profiles') is not null as present`,
   )
   return Boolean(rows[0]?.present)
 }

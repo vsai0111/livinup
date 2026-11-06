@@ -3,13 +3,13 @@ import { loadScriptEnv, describeTarget } from './_env'
 loadScriptEnv()
 
 /**
- * Drop everything LivinUp owns and rebuild from migrations + seed.
+ * Drop everything LivinUp owns and rebuild from migrations.
  *
  *   npm run db:reset
  *
- * Destructive. Refuses to run against a remote database unless LIVINUP_ALLOW_
- * REMOTE_RESET=yes is set, so a stray invocation cannot wipe a shared
- * environment.
+ * Destructive. Refuses to run against anything but the embedded local
+ * database, so a stray invocation cannot wipe a shared environment. Use
+ * `npm run db:fixtures` afterwards for demo content.
  */
 async function main(): Promise<void> {
   const driver =
@@ -19,10 +19,10 @@ async function main(): Promise<void> {
         ? 'postgres'
         : 'pglite'
 
-  if (driver !== 'pglite' && process.env.LIVINUP_ALLOW_REMOTE_RESET !== 'yes') {
+  if (driver !== 'pglite') {
     console.error(
       `Refusing to reset ${describeTarget()}.\n` +
-        'This would drop every table. If you are certain, re-run with LIVINUP_ALLOW_REMOTE_RESET=yes.',
+        'db:reset only runs against the embedded local database. It would drop every table.',
     )
     process.exitCode = 1
     return
@@ -30,19 +30,13 @@ async function main(): Promise<void> {
 
   const { createDbHandle } = await import('../lib/db/connect')
   const { migrate } = await import('../lib/db/migrate')
-  const { seedDatabase } = await import('../services/ingestion/seed-runner')
 
   console.log(`Resetting ${describeTarget()}`)
   const db = await createDbHandle()
-
   try {
     await db.exec('drop schema public cascade; create schema public;')
-    await migrate(db)
-    const summary = await seedDatabase(db)
-    console.log('\nReset complete:')
-    for (const [key, value] of Object.entries(summary)) {
-      console.log(`  ${key.padEnd(20)} ${value}`)
-    }
+    const { applied } = await migrate(db)
+    console.log(`Reset complete: ${applied.length} migration(s) applied.`)
   } finally {
     await db.close()
   }

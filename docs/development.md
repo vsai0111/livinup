@@ -26,6 +26,8 @@ is required for local development.
 
 ```bash
 npm run dev            # dev server (auto-migrates and seeds on first run)
+npm run dev:local      # dev server forced onto the embedded database and local auth,
+                       # even when .env.local points at Supabase
 npm run build          # production build
 npm start              # run the production build
 

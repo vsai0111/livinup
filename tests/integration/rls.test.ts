@@ -2,151 +2,132 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createTestDb, createTestUser, type TestDb } from '../helpers/db'
 
 /**
- * Row-level security.
+ * Database access model (docs/product-spec.md 7.2).
  *
- * These tests matter because RLS is what makes Supabase's *public* anon key safe
- * to ship in the browser bundle. Without them, "we enabled RLS" is an
- * unverified claim — and a policy with a subtly wrong USING clause looks
- * identical to a correct one until someone reads another user's data.
+ * The browser holds Supabase's public key, which reaches the database as
+ * `anon` or `authenticated`. LivinUp never uses that path: the server connects
+ * as the table owner and authorises every query itself. So the client roles
+ * are granted nothing on any table, and RLS is on everywhere as a second layer.
  *
- * Each test assumes the `authenticated` role and sets `app.user_id`, which is
- * exactly what `livinup_current_user_id()` reads. LivinUp's own server connects as
- * a trusted role that bypasses RLS, so these exercise the client-key path.
+ * These tests pin that. A single stray `grant` in a future migration would let
+ * anyone with the public key read wardrobes, or (as 0004 did on profiles)
+ * promote themselves to admin.
  */
-describe('row level security', () => {
+describe('database access model', () => {
   let context: TestDb
   let alice: string
-  let bob: string
 
   beforeAll(async () => {
-    context = await createTestDb({ seed: false })
-
-    alice = (await createTestUser(context.db, 'Alice')).id
-    bob = (await createTestUser(context.db, 'Bob')).id
-
-    // A product to attach user rows to.
-    await context.db.query(
-      `insert into products (id, canonical_title, brand, category, match_key)
-       values ('33333333-3333-3333-3333-333333333333', 'Test', 'Aera', 'clothing', 'title:aera:test')`,
-    )
-
-    for (const userId of [alice, bob]) {
-      await context.db.query(
-        `insert into saved_products (user_id, product_id)
-         values ($1, '33333333-3333-3333-3333-333333333333')`,
-        [userId],
-      )
-      await context.db.query(
-        `insert into user_preferences (user_id, attribute, value, weight, source)
-         values ($1, 'color', $2, 0.9, 'explicit')`,
-        [userId, userId === alice ? 'olive' : 'navy'],
-      )
-    }
-
-    // The client-facing roles need table privileges as well as passing policies.
-    await context.db.exec(`
-      grant usage on schema public to authenticated, anon;
-      grant select, insert, update, delete on saved_products, user_preferences to authenticated;
-      grant select on products to authenticated, anon;
-    `)
+    context = await createTestDb()
+    alice = (await createTestUser(context.db, { displayName: 'Alice' })).id
   }, 120_000)
 
   afterAll(async () => {
     await context?.close()
   })
 
-  /** Run a query as `authenticated`, with `app.user_id` bound to `userId`. */
-  async function asUser<T = Record<string, unknown>>(
-    userId: string | null,
+  async function asRole<T = Record<string, unknown>>(
+    role: 'anon' | 'authenticated',
     sql: string,
     params: unknown[] = [],
+    userId: string | null = null,
   ): Promise<T[]> {
     return context.db.transaction(async (tx) => {
       await tx.query('select set_config($1, $2, true)', ['app.user_id', userId ?? ''])
-      await tx.exec('set local role authenticated')
+      await tx.exec(`set local role ${role}`)
       return tx.query<T>(sql, params)
     })
   }
 
-  it('shows a user only their own saved products', async () => {
-    const aliceRows = await asUser(alice, 'select user_id from saved_products')
-    expect(aliceRows).toHaveLength(1)
-    expect(aliceRows[0].user_id).toBe(alice)
+  async function publicTables(): Promise<string[]> {
+    const rows = await context.db.query<{ relname: string }>(
+      `select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'public' and c.relkind = 'r' and c.relname <> 'schema_migrations'
+        order by 1`,
+    )
+    return rows.map((row) => row.relname)
+  }
 
-    const bobRows = await asUser(bob, 'select user_id from saved_products')
-    expect(bobRows).toHaveLength(1)
-    expect(bobRows[0].user_id).toBe(bob)
-  })
-
-  it('hides another user rows even when they are asked for by id', async () => {
-    // The direct-object-reference attempt: name Bob's row explicitly as Alice.
-    const rows = await asUser(alice, 'select * from saved_products where user_id = $1', [bob])
-    expect(rows).toEqual([])
-  })
-
-  it('shows a user only their own preferences', async () => {
-    const rows = await asUser<{ value: string }>(alice, 'select value from user_preferences')
-    expect(rows.map((r) => r.value)).toEqual(['olive'])
-  })
-
-  it('refuses to let a user write a row owned by someone else', async () => {
-    await expect(
-      asUser(
-        alice,
-        `insert into user_preferences (user_id, attribute, value, weight, source)
-         values ($1, 'color', 'red', 0.5, 'explicit')`,
-        [bob],
-      ),
-    ).rejects.toThrow(/row-level security|violates/i)
-  })
-
-  it('refuses to let a user delete another user rows', async () => {
-    await asUser(alice, 'delete from saved_products where user_id = $1', [bob])
-
-    // Bob's row must still be there.
-    const rows = await context.db.query('select user_id from saved_products where user_id = $1', [
-      bob,
-    ])
-    expect(rows).toHaveLength(1)
-  })
-
-  it('returns nothing at all for an unauthenticated session', async () => {
-    const rows = await asUser(null, 'select * from saved_products')
-    expect(rows).toEqual([])
-  })
-
-  it('still exposes the public catalogue to anonymous readers', async () => {
-    const rows = await context.db.transaction(async (tx) => {
-      await tx.exec('set local role anon')
-      return tx.query('select id from products')
-    })
-    expect(rows.length).toBeGreaterThan(0)
-  })
-
-  it('never exposes the credentials table to any client role', async () => {
-    for (const role of ['anon', 'authenticated']) {
-      await expect(
-        context.db.transaction(async (tx) => {
-          await tx.exec(`set local role ${role}`)
-          return tx.query('select * from local_auth_users')
-        }),
-      ).rejects.toThrow(/permission denied/i)
+  it('has dropped every shopping table', async () => {
+    const tables = await publicTables()
+    for (const retired of [
+      'products',
+      'merchants',
+      'merchant_products',
+      'price_history',
+      'saved_products',
+      'affiliate_clicks',
+      'ingestion_runs',
+    ]) {
+      expect(tables).not.toContain(retired)
     }
   })
 
-  it('has RLS enabled on every table holding user data', async () => {
-    const rows = await context.db.query<{ tablename: string }>(
-      `select c.relname as tablename
-         from pg_class c
-         join pg_namespace n on n.oid = c.relnamespace
-        where n.nspname = 'public'
-          and c.relkind = 'r'
-          and c.relrowsecurity = false
-          and c.relname in (
-            'profiles', 'user_preferences', 'saved_products', 'product_likes',
-            'product_rejections', 'user_events', 'affiliate_clicks', 'local_auth_users'
-          )`,
+  it('keeps the user data that predates v1', async () => {
+    const tables = await publicTables()
+    for (const kept of ['profiles', 'user_preferences', 'user_events', 'local_auth_users']) {
+      expect(tables).toContain(kept)
+    }
+  })
+
+  it('has RLS enabled on every application table', async () => {
+    const rows = await context.db.query<{ relname: string }>(
+      `select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'public' and c.relkind = 'r'
+          and c.relname <> 'schema_migrations' and c.relrowsecurity = false`,
     )
-    expect(rows.map((r) => r.tablename)).toEqual([])
+    expect(rows.map((row) => row.relname)).toEqual([])
+  })
+
+  it('grants no client role any privilege on any application table', async () => {
+    const rows = await context.db.query<{
+      table_name: string
+      grantee: string
+      privilege_type: string
+    }>(
+      `select table_name, grantee, privilege_type from information_schema.role_table_grants
+        where table_schema = 'public' and grantee in ('anon', 'authenticated')
+          and table_name <> 'schema_migrations'`,
+    )
+    expect(rows).toEqual([])
+  })
+
+  it('refuses to let a signed-in client read or edit their own profile directly', async () => {
+    // The privilege escalation 0007 closes: before it, this update succeeded.
+    await expect(
+      asRole('authenticated', `update profiles set role = 'admin' where id = $1`, [alice], alice),
+    ).rejects.toThrow(/permission denied/i)
+    await expect(asRole('authenticated', 'select * from profiles', [], alice)).rejects.toThrow(
+      /permission denied/i,
+    )
+
+    const rows = await context.db.query<{ role: string }>(
+      'select role from profiles where id = $1',
+      [alice],
+    )
+    expect(rows[0]?.role).toBe('member')
+  })
+
+  it('denies client roles every user-content table', async () => {
+    for (const table of [
+      'wardrobe_items',
+      'media',
+      'outfits',
+      'posts',
+      'comments',
+      'follows',
+      'blocks',
+      'notifications',
+      'reports',
+      'local_auth_users',
+      'user_preferences',
+      'user_events',
+    ]) {
+      for (const role of ['anon', 'authenticated'] as const) {
+        await expect(asRole(role, `select * from ${table}`, [], alice)).rejects.toThrow(
+          /permission denied/i,
+        )
+      }
+    }
   })
 })

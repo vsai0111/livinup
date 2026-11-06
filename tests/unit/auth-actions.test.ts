@@ -37,6 +37,12 @@ vi.mock('@/lib/analytics/events', () => ({
 
 vi.mock('@/lib/analytics/session', () => ({ ensureSessionId: async () => 'session-id' }))
 
+vi.mock('@/lib/profiles/repository', () => ({
+  recordConsent: async () => {
+    mocks.calls.push('recordConsent')
+  },
+}))
+
 vi.mock('next/navigation', () => ({
   redirect: (target: string) => {
     mocks.calls.push(`redirect:${target}`)
@@ -51,12 +57,28 @@ const { signUpAction, signInAction } = await import('@/app/(auth)/actions')
 
 const USER = { id: '3f6b4f00-0000-4000-8000-000000000001', email: 'new.person@example.com' }
 
-function form(): FormData {
+function form(consent: { age?: boolean; terms?: boolean } = {}): FormData {
   const data = new FormData()
   data.set('email', USER.email)
   data.set('password', 'correct-horse-battery')
+  if (consent.age !== false) data.set('ageConfirmed', 'on')
+  if (consent.terms !== false) data.set('termsAccepted', 'on')
   return data
 }
+
+describe('signUpAction consent', () => {
+  it('refuses a sign-up without the 18+ confirmation, before creating anything', async () => {
+    const state = await signUpAction({}, form({ age: false }))
+    expect(state.field).toBe('consent')
+    expect(mocks.provider.signUp).not.toHaveBeenCalled()
+  })
+
+  it('refuses a sign-up without accepting the terms', async () => {
+    const state = await signUpAction({}, form({ terms: false }))
+    expect(state.field).toBe('consent')
+    expect(mocks.provider.signUp).not.toHaveBeenCalled()
+  })
+})
 
 beforeEach(() => {
   mocks.calls.length = 0
@@ -84,6 +106,7 @@ describe('signUpAction when the provider requires email verification', () => {
     expect(mocks.calls).toEqual([
       'recordEvent:signup_started',
       'ensureProfile',
+      'recordConsent',
       'recordEvent:signup_completed',
     ])
     expect(mocks.ensureProfile).toHaveBeenCalledWith(expect.anything(), USER)
@@ -117,6 +140,7 @@ describe('signUpAction when a session is established immediately', () => {
     expect(mocks.calls).toEqual([
       'recordEvent:signup_started',
       'ensureProfile',
+      'recordConsent',
       'recordEvent:signup_completed',
       'redirect:/onboarding',
     ])

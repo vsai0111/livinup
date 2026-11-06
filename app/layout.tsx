@@ -1,37 +1,27 @@
 import type { Metadata, Viewport } from 'next'
-import { Caveat, Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono } from 'next/font/google'
 import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from '@/config/app'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
 
-// Handwritten marginalia on the landing page. Decorative only — every note it
-// sets is aria-hidden, so a failed font load costs nothing but the flourish.
-const caveat = Caveat({ variable: '--font-caveat', subsets: ['latin'], display: 'swap' })
+/** Absolute base for Open Graph images and canonical URLs. */
+function siteBase(): URL {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  if (configured) return new URL(configured)
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+  if (vercel) return new URL(`https://${vercel}`)
+  return new URL('http://localhost:3000')
+}
 
 export const metadata: Metadata = {
-  title: { default: `${APP_NAME} — ${APP_TAGLINE}`, template: `%s · ${APP_NAME}` },
+  metadataBase: siteBase(),
+  title: { default: `${APP_NAME} · ${APP_TAGLINE}`, template: `%s · ${APP_NAME}` },
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
   robots: { index: true, follow: true },
-  verification: {
-    // Site-ownership proof for the Admitad/Mitgo publisher account. It has to
-    // be served from the root layout so it is present on the homepage, which is
-    // the document their crawler fetches.
-    //
-    // Not a secret: a verification token is public by design, and is worthless
-    // to anyone who does not already control the DNS for livinup.in.
-    // An array emits one <meta> per value, so both tokens stand side by side
-    // and verifying the second does not invalidate the first.
-    other: {
-      'mitgo-verification': [
-        '7344ff2a-acfe-4121-ae8e-73012bd90aa3',
-        '119f1e72-d546-4f11-bd57-7eb8a46a3df3',
-      ],
-      'cuelinks-verification': 'VERIFY-CL-HO13DMUI',
-    },
-  },
+  openGraph: { siteName: APP_NAME, type: 'website', locale: 'en_IN' },
 }
 
 export const viewport: Viewport = {
@@ -39,17 +29,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Not capping maximumScale: preventing pinch-zoom breaks the page for anyone
   // who needs to magnify it.
-  // One theme, so one colour. Offering a dark themeColor the stylesheet does
-  // not implement gives mobile browsers a chrome that clashes with the page.
   themeColor: '#ffffff',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         <a
           href="#main"

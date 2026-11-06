@@ -1,107 +1,206 @@
-import { redirect } from 'next/navigation'
-import { requireUser } from '@/lib/auth'
+import Link from 'next/link'
+import { PAGE_SIZE } from '@/config/app'
+import { OCCASIONS, OCCASION_LABELS, type Occasion } from '@/config/wardrobe'
+import { requireOnboardedUser } from '@/lib/auth'
+import { exploreFeed, followingFeed } from '@/lib/community/posts'
 import { getDb } from '@/lib/db'
-import { recordEvent } from '@/lib/analytics/events'
-import { loadProductStates } from '@/lib/engagement/repository'
-import { countPreferences } from '@/lib/preferences/repository'
-import { buildHomeFeed } from '@/lib/recommendations/service'
+import { searchAccounts, suggestedAccounts } from '@/lib/profiles/repository'
+import { countItems } from '@/lib/wardrobe/repository'
+import { cn } from '@/lib/utils/cn'
+import { PageContainer } from '@/components/layout/PageContainer'
+import { PostCard } from '@/components/community/PostCard'
+import { AccountRow } from '@/components/community/AccountRow'
 import { ButtonLink } from '@/components/ui/Button'
-import { EmptyState } from '@/components/ui/EmptyState'
-import { PageHeader } from '@/components/ui/PageHeader'
-import { ProductGrid } from '@/components/products/ProductGrid'
 
 export const metadata = { title: 'Home' }
 
 /**
- * The personalised feed.
- *
- * Sections come from the recommendation pipeline and are only rendered when
- * they have enough content to justify a heading — an "empty rail" is worse than
- * no rail. All rendering is server-side, so the page is useful on first paint
- * without waiting for client JavaScript.
+ * Home: the Following and Explore feeds, newest first. No ranking in v1.
+ * Server-rendered with "Load more" links, so it works without JavaScript.
  */
-export default async function HomePage() {
-  const session = await requireUser('/home')
-
-  // A user who has never answered anything is sent through onboarding once.
-  if (!session.profile.onboardingCompleted) redirect('/onboarding')
+export default async function HomePage({ searchParams }: PageProps<'/home'>) {
+  const session = await requireOnboardedUser('/home')
+  const params = await searchParams
+  const tab = params.tab === 'explore' ? 'explore' : 'following'
+  const occasion = OCCASIONS.includes(params.occasion as Occasion)
+    ? (params.occasion as Occasion)
+    : null
+  const cursor = typeof params.cursor === 'string' ? params.cursor : null
+  const query = typeof params.q === 'string' ? params.q.slice(0, 60) : ''
 
   const db = await getDb()
-  const [sections, preferenceCount] = await Promise.all([
-    buildHomeFeed(db, { userId: session.id }),
-    countPreferences(db, session.id),
+  const [feed, suggestions, itemCount, results] = await Promise.all([
+    tab === 'explore'
+      ? exploreFeed(db, session.id, { cursor, limit: PAGE_SIZE.feed, occasion })
+      : followingFeed(db, session.id, { cursor, limit: PAGE_SIZE.feed }),
+    suggestedAccounts(db, session.id, 5),
+    countItems(db, session.id),
+    query ? searchAccounts(db, query, session.id) : Promise.resolve([]),
   ])
 
-  await recordEvent(db, {
-    userId: session.id,
-    eventType: 'home_view',
-    metadata: { sections: sections.length },
-  })
-
-  // One state lookup for every product on the page, rather than one per card.
-  const productIds = [...new Set(sections.flatMap((s) => s.items.map((i) => i.product.id)))]
-  const states = await loadProductStates(db, session.id, productIds)
-
-  await recordEvent(db, {
-    userId: session.id,
-    eventType: 'recommendation_view',
-    metadata: { products: productIds.length },
-  })
-
-  const firstName = session.profile.displayName.split(' ')[0]
+  const href = (next: Record<string, string | null>) => {
+    const search = new URLSearchParams()
+    const merged = { tab, occasion, ...next }
+    for (const [key, value] of Object.entries(merged)) if (value) search.set(key, value)
+    return `/home?${search.toString()}`
+  }
 
   return (
-    <div className="space-y-10">
-      <PageHeader
-        title={`Hello, ${firstName}`}
-        description={
-          preferenceCount === 0
-            ? 'Save or like anything you find appealing and this feed will start to fit you.'
-            : `Ranked against ${preferenceCount} preference${preferenceCount === 1 ? '' : 's'}. Adjust them any time.`
-        }
-        actions={
-          <>
-            <ButtonLink href="/search" variant="secondary" size="sm">
-              Search
+    <PageContainer width="wide">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="min-w-0">
+          <div className="flex items-end justify-between gap-4">
+            <h1 className="text-ink text-2xl font-semibold tracking-tight">Home</h1>
+            <ButtonLink href="/create" size="sm">
+              New post
             </ButtonLink>
-            <ButtonLink href="/preferences" variant="secondary" size="sm">
-              Preferences
-            </ButtonLink>
-          </>
-        }
-      />
+          </div>
 
-      {sections.length === 0 ? (
-        <EmptyState
-          title="Nothing to show yet"
-          description="We could not find products matching what you have told us so far. Widening your preferences usually fixes this."
-          action={
-            <div className="flex flex-wrap justify-center gap-2">
-              <ButtonLink href="/preferences">Adjust preferences</ButtonLink>
-              <ButtonLink href="/search" variant="secondary">
-                Browse everything
-              </ButtonLink>
-            </div>
-          }
-        />
-      ) : (
-        <div className="space-y-12">
-          {sections.map((section) => (
-            <section key={section.id} aria-labelledby={`section-${section.id}`}>
-              <div className="border-line mb-5 border-b pb-4">
-                <h2 id={`section-${section.id}`} className="text-ink text-lg font-semibold">
-                  {section.title}
-                </h2>
-                {section.subtitle && (
-                  <p className="text-ink-muted mt-1 text-sm leading-relaxed">{section.subtitle}</p>
+          <div className="border-line mt-5 flex gap-1 border-b" role="tablist">
+            {(['following', 'explore'] as const).map((value) => (
+              <Link
+                key={value}
+                href={value === 'following' ? '/home' : '/home?tab=explore'}
+                role="tab"
+                aria-selected={tab === value}
+                className={cn(
+                  '-mb-px border-b-2 px-3 py-2.5 text-sm',
+                  tab === value
+                    ? 'border-ink text-ink font-semibold'
+                    : 'text-ink-muted hover:text-ink border-transparent font-medium',
                 )}
-              </div>
+              >
+                {value === 'following' ? 'Following' : 'Explore'}
+              </Link>
+            ))}
+          </div>
 
-              <ProductGrid items={section.items} states={states} label={section.title} />
-            </section>
-          ))}
+          {tab === 'explore' && (
+            <nav aria-label="Filter by occasion" className="mt-4 flex flex-wrap gap-1.5">
+              <Link
+                href={href({ occasion: null, cursor: null })}
+                className={cn(
+                  'rounded-full border px-3 py-1.5 text-xs font-medium',
+                  !occasion
+                    ? 'border-ink bg-ink text-primary-ink'
+                    : 'border-line-strong text-ink-muted hover:text-ink',
+                )}
+              >
+                All
+              </Link>
+              {OCCASIONS.map((value) => (
+                <Link
+                  key={value}
+                  href={href({ occasion: value, cursor: null })}
+                  className={cn(
+                    'rounded-full border px-3 py-1.5 text-xs font-medium',
+                    occasion === value
+                      ? 'border-ink bg-ink text-primary-ink'
+                      : 'border-line-strong text-ink-muted hover:text-ink',
+                  )}
+                >
+                  {OCCASION_LABELS[value]}
+                </Link>
+              ))}
+            </nav>
+          )}
+
+          {feed.posts.length === 0 ? (
+            <div className="border-line mt-6 rounded-2xl border border-dashed px-6 py-14 text-center">
+              {tab === 'following' ? (
+                <>
+                  <h2 className="text-ink text-lg font-semibold">Your feed is quiet for now</h2>
+                  <p className="text-ink-muted mx-auto mt-2 max-w-md text-sm leading-relaxed">
+                    Follow people whose style you like and their outfits show up here. Your wardrobe
+                    works on its own too, even if you never post.
+                  </p>
+                  <div className="mt-6 flex flex-wrap justify-center gap-2">
+                    <ButtonLink href="/home?tab=explore">Explore outfits</ButtonLink>
+                    <ButtonLink href="/wardrobe" variant="secondary">
+                      {itemCount === 0 ? 'Start your wardrobe' : 'Open your wardrobe'}
+                    </ButtonLink>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-ink text-lg font-semibold">
+                    No posts {occasion ? `for ${OCCASION_LABELS[occasion].toLowerCase()} ` : ''}yet
+                  </h2>
+                  <p className="text-ink-muted mx-auto mt-2 max-w-md text-sm">
+                    Be the first to share an outfit.
+                  </p>
+                  <ButtonLink href="/create" className="mt-6">
+                    Share an outfit
+                  </ButtonLink>
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              <ul className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {feed.posts.map((post) => (
+                  <li key={post.id}>
+                    <PostCard post={post} signedIn />
+                  </li>
+                ))}
+              </ul>
+              {feed.nextCursor && (
+                <div className="mt-8 flex justify-center">
+                  <ButtonLink href={href({ cursor: feed.nextCursor })} variant="secondary">
+                    Load more
+                  </ButtonLink>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      )}
-    </div>
+
+        <aside className="space-y-6">
+          <form action="/home" method="get" role="search">
+            <input type="hidden" name="tab" value={tab} />
+            <label htmlFor="people-search" className="text-ink text-sm font-semibold">
+              Find people and brands
+            </label>
+            <input
+              id="people-search"
+              type="search"
+              name="q"
+              defaultValue={query}
+              placeholder="Name or @username"
+              className="border-line-strong bg-surface text-ink placeholder:text-ink-subtle mt-2 h-10 w-full rounded-lg border px-3 text-sm"
+            />
+          </form>
+
+          {query && (
+            <section aria-label="Search results">
+              {results.length === 0 ? (
+                <p className="text-ink-muted text-sm">No one matches “{query}”.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {results.map((account) => (
+                    <li key={account.id}>
+                      <AccountRow account={account} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
+
+          {suggestions.length > 0 && (
+            <section>
+              <h2 className="text-ink text-sm font-semibold">Accounts to follow</h2>
+              <ul className="mt-2 space-y-1">
+                {suggestions.map((account) => (
+                  <li key={account.id}>
+                    <AccountRow account={account} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </aside>
+      </div>
+    </PageContainer>
   )
 }

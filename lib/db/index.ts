@@ -2,7 +2,7 @@ import 'server-only'
 import { resolveDbDriver } from '@/config/env.server'
 import { logger } from '@/lib/logging/logger'
 import { createDbHandle } from './connect'
-import type { Db, DbHandle } from './types'
+import type { DbHandle } from './types'
 
 export type { Db, DbHandle } from './types'
 export { queryOne } from './types'
@@ -31,17 +31,14 @@ async function connect(): Promise<DbHandle> {
  * that `npm run dev` works immediately after a clone with no setup step. A
  * remote Postgres is migrated explicitly via `npm run db:migrate` and is never
  * modified implicitly at request time.
+ *
+ * Migrations only. There is no sample data: the product is meant to be tried
+ * with your own wardrobe.
  */
 async function bootstrapEmbedded(db: DbHandle): Promise<void> {
-  const { migrate, isMigrated } = await import('./migrate')
-  const wasSetUp = await isMigrated(db)
+  const { migrate } = await import('./migrate')
   const { applied } = await migrate(db)
-
-  if (!wasSetUp || applied.length > 0) {
-    const { seedDatabase } = await import('@/services/ingestion/seed-runner')
-    const summary = await seedDatabase(db)
-    logger.info('embedded database seeded', { ...summary })
-  }
+  if (applied.length > 0) logger.info('embedded database migrated', { applied })
 }
 
 /** Get the shared database handle, connecting on first use. */
@@ -72,23 +69,4 @@ export async function closeDb(): Promise<void> {
 /** Which driver the current configuration resolves to. */
 export function currentDriver(): 'postgres' | 'pglite' {
   return resolveDbDriver()
-}
-
-/**
- * Run `fn` with the Postgres session bound to `userId`, so row-level security
- * policies evaluate against that user.
- *
- * Note this is defence in depth, not the primary control: LivinUp's server
- * connects as a trusted role that RLS does not constrain, so repository queries
- * additionally scope by `user_id` explicitly. See docs/database.md.
- */
-export async function withUserContext<T>(
-  db: Db,
-  userId: string,
-  fn: (tx: Db) => Promise<T>,
-): Promise<T> {
-  return db.transaction(async (tx) => {
-    await tx.query('select set_config($1, $2, true)', ['app.user_id', userId])
-    return fn(tx)
-  })
 }

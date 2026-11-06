@@ -1,69 +1,9 @@
-import { DEFAULT_CURRENCY, DEFAULT_LOCALE } from '@/config/app'
+import { DEFAULT_LOCALE } from '@/config/app'
 
 /**
- * Display formatting.
- *
- * Kept in one place so a price is written the same way on a card, a product
- * page and a price chart. Formatting never rounds in a way that changes the
- * number's meaning: prices are already exact to the cent by the time they get
- * here.
+ * Display formatting, kept in one place so a date or a count reads the same
+ * on every screen.
  */
-
-const currencyFormatters = new Map<string, Intl.NumberFormat>()
-
-/**
- * Format money.
- *
- * Whole amounts drop the ".00" because it reads better on a dense product grid;
- * everything else always shows exactly two decimals, so 61.6 renders as
- * "$61.60" rather than "$61.6".
- *
- * The cache key includes that choice. It previously did not, which meant the
- * first amount formatted decided the decimal behaviour for every subsequent
- * one — a single whole price early on made every later price lose its trailing
- * zero.
- */
-export function formatMoney(
-  amount: number,
-  currency: string = DEFAULT_CURRENCY,
-  locale: string = DEFAULT_LOCALE,
-): string {
-  const whole = Number.isInteger(amount)
-  const key = `${locale}:${currency}:${whole ? 'whole' : 'fraction'}`
-
-  let formatter = currencyFormatters.get(key)
-
-  if (!formatter) {
-    try {
-      formatter = new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: whole ? 0 : 2,
-        maximumFractionDigits: 2,
-      })
-    } catch {
-      // An invalid currency code must not break the page.
-      formatter = new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: whole ? 0 : 2,
-        maximumFractionDigits: 2,
-      })
-    }
-    currencyFormatters.set(key, formatter)
-  }
-
-  return formatter.format(amount)
-}
-
-/** "28% off" — rounds to a whole percent, which is all the precision that means anything. */
-export function formatDiscount(fraction: number): string {
-  return `${Math.round(fraction * 100)}% off`
-}
-
-export function formatPercent(fraction: number): string {
-  return `${Math.round(fraction * 100)}%`
-}
 
 /** Relative time in plain words: "3 days ago". */
 export function formatRelativeTime(iso: string, now: Date = new Date()): string {
@@ -96,8 +36,21 @@ export function formatDate(iso: string): string {
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, { dateStyle: 'medium' }).format(date)
 }
 
-/** Sentence-case a taxonomy term for display: "t-shirts" -> "T-shirts". */
+/** Compact counts: 999, 1.2K, 3.4L would confuse, so K/M like most apps. */
+export function formatCount(value: number): string {
+  if (value < 1000) return String(value)
+  return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(
+    value,
+  )
+}
+
+/** Sentence-case a vocabulary term for display: "date-night" -> "Date night". */
 export function humanize(value: string): string {
   const spaced = value.replace(/[-_]+/g, ' ').trim()
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
+
+/** "1 piece", "3 pieces". */
+export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`
 }

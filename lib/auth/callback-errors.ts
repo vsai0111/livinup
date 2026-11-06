@@ -1,16 +1,17 @@
 /**
- * Outcomes the email-confirmation callback can report to the sign-in page.
+ * Outcomes the auth callback can report to the sign-in page.
  *
  * Codes rather than sentences: the callback redirects through the URL bar, and
  * anything it puts there is attacker-supplied by the time /signin reads it.
- * Only these two values map to a message; everything else is ignored.
+ * Only these values map to a message; everything else is ignored.
  */
-export type AuthCallbackError = 'link_invalid' | 'link_expired'
+export type AuthCallbackError = 'link_invalid' | 'link_expired' | 'google_unavailable'
 
 const MESSAGES: Record<AuthCallbackError, string> = {
-  link_invalid: 'That confirmation link is not valid. Sign in, or create your account again.',
+  link_invalid: 'That link is not valid. Sign in, or create your account again.',
   link_expired:
-    'That confirmation link has expired, or was opened in a different browser from the one you signed up in. Sign in to continue.',
+    'That link has expired, or was opened in a different browser from the one you used. Sign in to continue.',
+  google_unavailable: 'Google sign-in is not available right now. Use your email and password.',
 }
 
 /** The message for a callback error code, or null when the code is unknown. */

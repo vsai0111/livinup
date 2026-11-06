@@ -1,47 +1,44 @@
 import { describe, expect, it } from 'vitest'
-import { formatDiscount, formatMoney, formatPercent, humanize } from '@/lib/utils/format'
+import { formatCount, formatRelativeTime, humanize, plural } from '@/lib/utils/format'
 
-describe('formatMoney', () => {
-  it('drops the decimals on whole amounts', () => {
-    expect(formatMoney(39, 'USD')).toBe('$39')
-  })
-
-  it('always shows two decimals on fractional amounts', () => {
-    // Regression: a shared formatter cache keyed only by locale+currency meant
-    // the first (whole) amount formatted made 61.6 render as "$61.6".
-    expect(formatMoney(39, 'USD')).toBe('$39')
-    expect(formatMoney(61.6, 'USD')).toBe('$61.60')
-    expect(formatMoney(61.65, 'USD')).toBe('$61.65')
-    expect(formatMoney(155.5, 'USD')).toBe('$155.50')
-  })
-
-  it('is order-independent', () => {
-    expect(formatMoney(0.5, 'USD')).toBe('$0.50')
-    expect(formatMoney(100, 'USD')).toBe('$100')
-    expect(formatMoney(0.5, 'USD')).toBe('$0.50')
-  })
-
-  it('falls back rather than throwing on an invalid currency', () => {
-    expect(() => formatMoney(10.5, 'NOTACURRENCY')).not.toThrow()
-  })
-
-  it('handles zero', () => {
-    expect(formatMoney(0, 'USD')).toBe('$0')
+describe('formatCount', () => {
+  it('leaves small numbers alone and compacts large ones', () => {
+    expect(formatCount(0)).toBe('0')
+    expect(formatCount(999)).toBe('999')
+    expect(formatCount(1200)).toBe('1.2K')
+    expect(formatCount(3_400_000)).toBe('3.4M')
   })
 })
 
-describe('formatDiscount and formatPercent', () => {
-  it('rounds to whole percents', () => {
-    expect(formatDiscount(0.2812)).toBe('28% off')
-    expect(formatPercent(0.845)).toBe('85%')
-    expect(formatPercent(0)).toBe('0%')
+describe('formatRelativeTime', () => {
+  const now = new Date('2026-06-01T12:00:00.000Z')
+
+  it('says "just now" under a minute', () => {
+    expect(formatRelativeTime('2026-06-01T11:59:30.000Z', now)).toBe('just now')
+  })
+
+  it('uses the largest whole unit', () => {
+    expect(formatRelativeTime('2026-06-01T09:00:00.000Z', now)).toBe('3 hours ago')
+    expect(formatRelativeTime('2026-05-29T12:00:00.000Z', now)).toBe('3 days ago')
+  })
+
+  it('returns an empty string for an invalid date', () => {
+    expect(formatRelativeTime('not a date', now)).toBe('')
   })
 })
 
 describe('humanize', () => {
-  it('makes a taxonomy term readable', () => {
-    expect(humanize('t-shirts')).toBe('T shirts')
-    expect(humanize('price_band')).toBe('Price band')
+  it('makes a vocabulary term readable', () => {
+    expect(humanize('date-night')).toBe('Date night')
+    expect(humanize('intimate_image')).toBe('Intimate image')
     expect(humanize('olive')).toBe('Olive')
+  })
+})
+
+describe('plural', () => {
+  it('picks the right form', () => {
+    expect(plural(1, 'piece')).toBe('1 piece')
+    expect(plural(3, 'piece')).toBe('3 pieces')
+    expect(plural(2, 'person', 'people')).toBe('2 people')
   })
 })

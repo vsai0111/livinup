@@ -33,7 +33,7 @@ export default function GlobalError({
       <div className="mt-7 flex flex-wrap justify-center gap-2.5">
         <Button onClick={reset}>Try again</Button>
         <ButtonLink href="/home" variant="secondary">
-          Go to your feed
+          Go home
         </ButtonLink>
       </div>
 
